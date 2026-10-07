@@ -62,16 +62,16 @@ td{padding:7px 8px;border-bottom:1px solid var(--rule);vertical-align:top}
 .empty{color:var(--mute);padding:20px 0;text-align:center}
 #msg{font-size:.8rem;color:var(--mute);min-height:1.2em;margin-bottom:8px}
 h2{font-size:1.05rem;margin:0 0 12px}
-.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:2px}
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:2px}
 .top h1{margin:0}
 .top .acts{display:flex;gap:8px;align-items:center}
 .pill,.help{font:inherit;font-size:.82rem;height:38px;border:1px solid var(--ink);background:none;color:var(--ink);cursor:pointer;border-radius:19px;padding:0 14px}
 .help{width:38px;padding:0;font-weight:700;font-size:1.05rem}
-.tabs{display:grid;grid-template-columns:repeat(3,1fr);margin:6px 0 10px;border:1.5px solid var(--ink);border-radius:2px;overflow:hidden}
-.tabs button{font:inherit;padding:11px 6px;border:0;border-left:1.5px solid var(--ink);background:none;color:var(--ink);cursor:pointer}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);margin:6px 0 10px;border:1.5px solid var(--ink);border-radius:2px;overflow:hidden}
+.tabs button{font:inherit;font-size:.86rem;padding:11px 3px;border:0;border-left:1.5px solid var(--ink);background:none;color:var(--ink);cursor:pointer}
 .tabs button:first-child{border-left:0}
 .tabs button[aria-pressed=true]{background:var(--ink);color:var(--sheet);font-weight:700}
-.datos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px}
+.datos{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:8px}
 .datos .sec{width:100%;height:38px;padding:0 6px}
 .row .sec{height:40px;align-self:end}
 .row .full{grid-column:1/-1;align-self:stretch}
@@ -92,15 +92,43 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
 .tt{font-weight:700;border-bottom:0;border-top:2px solid var(--ink);margin-top:4px;padding-top:6px}
 .lnk{border:0;background:none;color:var(--mute);cursor:pointer;font:inherit}
 .dl{margin:0;padding-left:18px;font-size:.88rem}
+.lock{position:fixed;inset:0;z-index:50;background:var(--paper);display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto}
+.lock .book{width:min(420px,100%);margin:0}
+.err{color:var(--out);font-size:.85rem;min-height:1.2em}
+.badge{display:inline-block;font-size:.72rem;border:1px solid var(--rule);padding:0 8px;border-radius:9px;color:var(--mute)}
+.badge.pf{border-color:var(--ink);color:var(--ink)}
+.fin-s{font-size:.8rem;color:var(--mute)}.fin-s.warn{color:var(--out);font-weight:700}
+.ulink{text-align:center;text-decoration:underline}
+[hidden]{display:none!important}
 :root[data-theme="dark"]{color-scheme:dark}:root[data-theme="light"]{color-scheme:light}
 </style>
 </head>
 <body>
-<main>
-<div class="top"><h1>Libro diario</h1><div class="acts"><button class="pill" id="tema" type="button">Modo oscuro</button><button class="help" id="ayb" type="button" aria-label="Ayuda" title="Ayuda">?</button></div></div>
+<div class="lock" id="lock" hidden>
+<section class="book">
+<h1 style="font-size:1.4rem"><span class="em">🔒</span> Libro diario</h1>
+<form id="lkU" hidden>
+<p class="sub" style="margin:0">Ingresá tu código para abrir tus datos.</p>
+<label>Código<input id="lcode" type="password" autocomplete="off" required></label>
+<div class="err" id="lerr" role="alert"></div>
+<button class="add" id="lbtn" type="submit">Desbloquear</button>
+<button class="lnk ulink" id="lforg" type="button">Olvidé mi código</button>
+</form>
+<form id="lkS" hidden>
+<p class="sub" style="margin:0">Creá un código para proteger tus datos. Se guardan cifrados: sin el código no se pueden abrir.</p>
+<label>Código nuevo<input id="scode" type="password" autocomplete="off" required></label>
+<label>Repetí el código<input id="scode2" type="password" autocomplete="off" required></label>
+<div class="preview">Mínimo 4 caracteres; mejor 6 o más, con números y letras. Si lo olvidás no hay forma de recuperarlo.</div>
+<div class="err" id="serr" role="alert"></div>
+<button class="add" type="submit">Guardar código y entrar</button>
+</form>
+</section>
+</div>
+<main id="app" hidden>
+<div class="top"><h1>Libro diario</h1><div class="acts"><button class="help em" id="lkb" type="button" aria-label="Bloquear ahora" title="Bloquear ahora">🔒</button><button class="pill" id="tema" type="button">Modo oscuro</button><button class="help" id="ayb" type="button" aria-label="Ayuda" title="Ayuda">?</button></div></div>
 <p class="sub">Registrá cada ingreso y egreso. El importe es cantidad × valor unitario.</p>
-<nav class="tabs" aria-label="Secciones"><button type="button" id="nb-libro" aria-pressed="true">Libro diario</button><button type="button" id="nb-envio" aria-pressed="false">Envío</button><button type="button" id="nb-cuotas" aria-pressed="false">Cuotas</button></nav>
-<div class="datos"><button class="sec" id="bk" type="button">Respaldo</button><button class="sec" id="rs" type="button">Restaurar</button><button class="sec" id="exp" type="button">Exportar a Excel</button><input type="file" id="rf" accept=".json,application/json" hidden></div>
+<nav class="tabs" aria-label="Secciones"><button type="button" id="nb-libro" aria-pressed="true">Libro diario</button><button type="button" id="nb-envio" aria-pressed="false">Envío</button><button type="button" id="nb-cuotas" aria-pressed="false">Cuotas</button><button type="button" id="nb-ahorro" aria-pressed="false">Ahorro</button></nav>
+<div class="datos"><button class="sec" id="bk" type="button">Respaldo</button><button class="sec" id="rs" type="button">Restaurar</button><button class="sec" id="exp" type="button">Exportar a Excel</button><button class="sec" id="ccb" type="button">Cambiar código</button><input type="file" id="rf" accept=".json,application/json" hidden></div>
 <div id="msg" role="status"></div>
 <div id="tab-libro">
 
@@ -155,6 +183,16 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
 </form></section>
 <section class="book"><h2>Cuotas</h2><div class="wrap" id="clist"></div><div class="total" id="cgen"></div></section>
 </div>
+<div id="tab-ahorro" hidden>
+<section class="book"><h2>Nuevo ahorro</h2>
+<form id="af">
+<div class="tipo" id="atipo" role="group" aria-label="Tipo de ahorro"><button type="button" class="i" data-a="guardado" aria-pressed="true">Guardado</button><button type="button" class="i" data-a="plazo" aria-pressed="false">Plazo fijo</button></div>
+<div class="row"><label>Importe ($)<input id="aimp" type="number" min="0" step="any" required></label><label id="afl" hidden>Fecha de finalización<input id="afin" type="date"></label></div>
+<label>Observaciones<textarea id="aobs" placeholder="Opcional"></textarea></label>
+<div class="btns"><button class="add" id="aok" type="submit">Agregar ahorro</button><button class="sec" id="acancel" type="button" hidden>Cancelar</button></div>
+</form></section>
+<section class="book"><h2>Ahorros</h2><div class="wrap" id="ahlist"></div><div class="total" id="ahgen"></div></section>
+</div>
 </main>
 <dialog id="ayuda" aria-labelledby="ayt">
 <div class="dh"><h2 id="ayt">Cómo usar la app</h2><button type="button" id="ayc">Cerrar</button></div>
@@ -162,7 +200,7 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
 <h3>Libro diario</h3>
 <ul>
 <li>Elegí <b>Ingreso</b> o <b>Egreso</b>, escribí el nombre, la fecha, la cantidad y el valor unitario. El importe es cantidad × valor (2 unidades de $500 = $1.000).</li>
-<li>La categoría, las observaciones y el icono son opcionales. Tocá <b>Agregar al libro</b> para guardar.</li>
+<li>La categoría, las observaciones y el icono son opcionales. Hay iconos para servicios: 💧 agua, 🔥 gas y 💳 tarjeta. Tocá <b>Agregar al libro</b> para guardar.</li>
 <li>Los movimientos se agrupan por día, con subtotal y saldo de cada día. Abajo ves el total de ingresos, de egresos y el total general.</li>
 <li><b>✎</b> edita un movimiento y <b>✕</b> lo elimina. Con los filtros de mes y categoría ves solo una parte del libro.</li>
 </ul>
@@ -178,23 +216,56 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
 <li>Es solo informativa. Cargá el producto, las cuotas restantes y el valor de la cuota.</li>
 <li>Te muestra cuánto falta pagar por producto (cuotas × valor) y el total de todos los productos.</li>
 </ul>
+<h3>Ahorro</h3>
+<ul>
+<li>Elegí el tipo: <b>Guardado</b> (plata que tenés guardada) o <b>Plazo fijo</b>. Cargá el importe y, si querés, una observación.</li>
+<li>En <b>Plazo fijo</b> aparece la fecha de finalización y la lista te avisa cuántos días faltan (o si ya venció).</li>
+<li>Abajo ves el total ahorrado, separado entre guardado y plazo fijo.</li>
+</ul>
+<h3>Seguridad</h3>
+<ul>
+<li>Tus datos se guardan <b>cifrados</b> con tu código. Sin el código no se pueden leer, ni siquiera mirando el almacenamiento del navegador.</li>
+<li>La app se bloquea sola a los 3 minutos sin usarla, o si la dejás en segundo plano más de 30 segundos. También podés tocar el 🔒 de arriba.</li>
+<li>Tras 5 intentos fallidos hay que esperar antes de volver a probar.</li>
+<li><b>Si olvidás el código no se puede recuperar.</b> Guardá un respaldo y anotá el código en un lugar seguro.</li>
+</ul>
 <h3>Botones de arriba</h3>
 <ul>
 <li><b>Modo oscuro / claro:</b> cambia el aspecto de la app y recuerda tu elección.</li>
-<li><b>Respaldo:</b> descarga un archivo con todos tus datos (libro, envíos y cuotas).</li>
+<li><b>Respaldo:</b> descarga un archivo cifrado con todos tus datos (libro, envíos, cuotas y ahorro). Para abrirlo hace falta el código.</li>
 <li><b>Restaurar:</b> recupera los datos desde ese archivo. Reemplaza los datos que haya en ese momento.</li>
-<li><b>Exportar a Excel:</b> descarga un archivo con tres hojas (Libro diario, Envío y Cuotas). Incluye todos los movimientos, sin aplicar los filtros.</li>
+<li><b>Exportar a Excel:</b> descarga un archivo con cuatro hojas (Libro diario, Envío, Cuotas y Ahorro). Incluye todos los movimientos, sin aplicar los filtros. <b>Ojo:</b> el Excel no queda protegido con código.</li>
+<li><b>Cambiar código:</b> cambia el código de seguridad (pide el actual).</li>
+<li><b>🔒:</b> bloquea la app ahora mismo.</li>
 </ul>
 <h3>Importante</h3>
 <p>Los datos se guardan solo en este celular. Si borrás los datos del navegador o cambiás de teléfono se pierden, así que hacé un <b>Respaldo</b> de vez en cuando.</p>
 </div>
 </dialog>
+<dialog id="cc" aria-labelledby="cct">
+<div class="dh"><h2 id="cct">Cambiar código</h2><button type="button" id="ccx">Cerrar</button></div>
+<div class="db"><form id="ccf">
+<label>Código actual<input id="c0" type="password" autocomplete="off" required></label>
+<label>Código nuevo<input id="c1" type="password" autocomplete="off" required></label>
+<label>Repetí el código nuevo<input id="c2" type="password" autocomplete="off" required></label>
+<div class="err" id="cerr" role="alert"></div>
+<button class="add" type="submit">Cambiar código</button>
+</form></div>
+</dialog>
+<dialog id="pd" aria-labelledby="pdt">
+<div class="dh"><h2 id="pdt">Código del respaldo</h2></div>
+<div class="db"><form id="pform">
+<p>Este respaldo se cifró con otro código. Ingresalo para abrirlo.</p>
+<label>Código<input id="pcode" type="password" autocomplete="off" required></label>
+<div class="btns"><button class="add" type="submit">Abrir</button><button class="sec" id="pcancel" type="button">Cancelar</button></div>
+</form></div>
+</dialog>
 <script>
-var ICONS=['💰','💵','🛒','🍞','🍖','🍎','☕','🍴','⛽','🚗','🚌','🏠','💡','📱','👕','💊','🎁','🔧','📦','📄','💼','🎓','🎬','🏦'];
+var ICONS=['💰','💵','🛒','🍞','🍖','🍎','☕','🍴','⛽','🚗','🚌','🏠','💡','💧','🔥','💳','📱','👕','💊','🎁','🔧','📦','📄','💼','🎓','🎬','🏦'];
+var ICON_NAMES={'💧':'Agua','🔥':'Gas','💳':'Tarjeta'};
 var BASE=['Ventas','Compras','Servicios','Sueldos','Transporte','Alimentos','Impuestos','Otros'];
-var KEY='libro-diario-v2',items=[],tipo='ingreso',icono=ICONS[0],editId=null;
-try{items=JSON.parse(localStorage.getItem(KEY)||localStorage.getItem('libro-diario-v1')||'[]')}catch(e){items=[]}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(items))}catch(e){}}
+var items=[],tipo='ingreso',icono=ICONS[0],editId=null;
+function save(){persist()}
 var $=function(i){return document.getElementById(i)};
 var money=function(n){return '$ '+n.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})};
 var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
@@ -204,7 +275,7 @@ function mesLabel(m){var p=m.split('-');return MESES[+p[1]-1]+' '+p[0]}
 function reset(){$('fecha').value=new Date().toISOString().slice(0,10)}
 reset();
 
-ICONS.forEach(function(ic){var b=document.createElement('button');b.type='button';b.textContent=ic;b.setAttribute('aria-label','Icono '+ic);
+ICONS.forEach(function(ic){var b=document.createElement('button');b.type='button';b.textContent=ic;var nm=ICON_NAMES[ic]||'';b.setAttribute('aria-label','Icono '+(nm||ic));if(nm)b.title=nm;
 b.onclick=function(){icono=ic;draw();prev()};$('icons').appendChild(b)});
 function draw(){[].forEach.call($('icons').children,function(b){b.setAttribute('aria-pressed',b.textContent===icono)})}
 function setTipo(t){tipo=t;document.querySelectorAll('#ftipo button').forEach(function(x){x.setAttribute('aria-pressed',x.dataset.t===t)});prev()}
@@ -263,12 +334,10 @@ $('tabla').innerHTML=h+'</tbody></table>';
 var tot=TI-TE;
 $('tot').innerHTML='<div>Total ingresos<b class="in">'+money(TI)+'</b></div><div>Total egresos<b class="out">'+money(TE)+'</b></div><div>Total general<b class="'+(tot<0?'out':'in')+'">'+money(tot)+'</b></div>'}
 
-var envios=[],cuotas=[],draft=[],editCu=null;
-try{envios=JSON.parse(localStorage.getItem('libro-diario-envios')||'[]')}catch(e){envios=[]}
-try{cuotas=JSON.parse(localStorage.getItem('libro-diario-cuotas')||'[]')}catch(e){cuotas=[]}
-function saveAll(){try{localStorage.setItem('libro-diario-envios',JSON.stringify(envios));localStorage.setItem('libro-diario-cuotas',JSON.stringify(cuotas))}catch(e){}}
-function showTab(t){['libro','envio','cuotas'].forEach(function(x){$('tab-'+x).hidden=x!==t;$('nb-'+x).setAttribute('aria-pressed',x===t)});if(t==='envio')envRender();if(t==='cuotas')cuRender()}
-['libro','envio','cuotas'].forEach(function(x){$('nb-'+x).onclick=function(){showTab(x)}});
+var envios=[],cuotas=[],ahorros=[],draft=[],editCu=null,editAh=null;
+function saveAll(){persist()}
+function showTab(t){['libro','envio','cuotas','ahorro'].forEach(function(x){$('tab-'+x).hidden=x!==t;$('nb-'+x).setAttribute('aria-pressed',x===t)});if(t==='envio')envRender();if(t==='cuotas')cuRender();if(t==='ahorro')ahRender()}
+['libro','envio','cuotas','ahorro'].forEach(function(x){$('nb-'+x).onclick=function(){showTab(x)}});
 var imp=function(x){return x.cant*x.valor};
 function regOpts(){var ms={};items.forEach(function(x){ms[x.fecha.slice(0,7)]=1});var ml=Object.keys(ms).sort().reverse(),cur=$('emes').value;
 if(cur!=='*'&&ml.indexOf(cur)<0)cur=ml[0]||'*';
@@ -331,7 +400,10 @@ E.push(['','TOTAL GENERAL DE ENVÍOS',G]);
 var C=[['Producto','Cuotas restantes','Valor de la cuota','Falta pagar']],CT=0;
 cuotas.forEach(function(c){var t=c.resta*c.valor;CT+=t;C.push([c.prod,c.resta,c.valor,t])});
 C.push([],['','','TOTAL QUE FALTA',CT]);
-dl(xlsx([['Libro diario',L],['Envío',E],['Cuotas',C]]),'libro-diario.xlsx');msg('Excel descargado con tres hojas: Libro diario, Envío y Cuotas.')};
+var A=[['Tipo','Importe','Finaliza','Observaciones']],AT=0;
+ahorros.forEach(function(a){AT+=a.imp;A.push([a.tipo==='plazo'?'Plazo fijo':'Guardado',a.imp,a.fin?fmtDate(a.fin):'',a.obs||''])});
+A.push([],['TOTAL AHORRADO',AT]);
+dl(xlsx([['Libro diario',L],['Envío',E],['Cuotas',C],['Ahorro',A]]),'libro-diario.xlsx');msg('Excel descargado con cuatro hojas. Ojo: ese archivo no queda protegido con código.')};
 /*XLSX*/
 function crc(b){var c,t=crc.t;if(!t){t=crc.t=[];for(var n=0;n<256;n++){c=n;for(var k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}}c=-1;for(var i=0;i<b.length;i++)c=t[(c^b[i])&255]^(c>>>8);return(c^-1)>>>0}
 function zip(files){var enc=new TextEncoder(),out=[],cd=[],off=0;
@@ -357,9 +429,132 @@ sheets.forEach(function(s,i){f.push(['xl/worksheets/sheet'+(i+1)+'.xml',sheetXml
 return zip(f)}
 /*END*/
 function dl(blob,name){var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(a.href)},2000)}
-$('bk').onclick=function(){dl(new Blob([JSON.stringify({items:items,envios:envios,cuotas:cuotas})],{type:'application/json'}),'respaldo-libro-diario.json');msg('Respaldo descargado.')};
+/* ===== AHORRO ===== */
+var ahTipo='guardado';
+function setAhTipo(t){ahTipo=t;document.querySelectorAll('#atipo button').forEach(function(x){x.setAttribute('aria-pressed',x.dataset.a===t)});$('afl').hidden=t!=='plazo';$('afin').required=t==='plazo';if(t!=='plazo')$('afin').value=''}
+document.querySelectorAll('#atipo button').forEach(function(b){b.onclick=function(){setAhTipo(b.dataset.a)}});
+$('af').onsubmit=function(e){e.preventDefault();
+var o={tipo:ahTipo,imp:parseFloat($('aimp').value)||0,fin:ahTipo==='plazo'?$('afin').value:'',obs:$('aobs').value.trim()};
+if(editAh){ahorros=ahorros.map(function(a){return a.id===editAh?Object.assign({},o,{id:editAh}):a})}else{o.id=Date.now();ahorros.push(o)}
+persist();ahEnd();ahRender()};
+function ahEnd(){editAh=null;$('af').reset();setAhTipo('guardado');$('aok').textContent='Agregar ahorro';$('acancel').hidden=true}
+$('acancel').onclick=ahEnd;
+function ahEdit(id){var a=ahorros.filter(function(x){return x.id===id})[0];if(!a)return;editAh=id;setAhTipo(a.tipo);
+$('aimp').value=a.imp;$('afin').value=a.fin||'';$('aobs').value=a.obs||'';$('aok').textContent='Guardar cambios';$('acancel').hidden=false;
+$('af').scrollIntoView({behavior:'smooth'});$('aimp').focus()}
+function ahDel(id){if(editAh===id)ahEnd();ahorros=ahorros.filter(function(a){return a.id!==id});persist();ahRender()}
+function ahDias(f){var p=f.split('-'),d=new Date(+p[0],+p[1]-1,+p[2]),n=new Date();n=new Date(n.getFullYear(),n.getMonth(),n.getDate());return Math.round((d-n)/864e5)}
+function ahRender(){
+if(!ahorros.length){$('ahlist').innerHTML='<p class="empty">Todavía no hay ahorros.</p>';$('ahgen').innerHTML='';return}
+var tg=0,tp=0,h='<table style="min-width:520px"><thead><tr><th>Tipo</th><th>Finaliza</th><th class="n">Importe</th><th></th></tr></thead><tbody>';
+ahorros.forEach(function(a){var pf=a.tipo==='plazo';if(pf)tp+=a.imp;else tg+=a.imp;
+var fin='—';
+if(pf&&a.fin){var d=ahDias(a.fin),st=d<0?'Venció hace '+(-d)+(d===-1?' día':' días'):d===0?'Vence hoy':d===1?'Falta 1 día':'Faltan '+d+' días';
+fin=fmtDate(a.fin)+'<div class="fin-s'+(d<=7?' warn':'')+'">'+st+'</div>'}
+h+='<tr><td><span class="badge'+(pf?' pf':'')+'">'+(pf?'Plazo fijo':'Guardado')+'</span>'+(a.obs?'<div class="obs">'+esc(a.obs)+'</div>':'')+'</td><td>'+fin+'</td><td class="n"><b>'+money(a.imp)+'</b></td>'+
+'<td class="act"><button aria-label="Editar ahorro" onclick="ahEdit('+a.id+')">✎</button><button aria-label="Eliminar ahorro" onclick="ahDel('+a.id+')">✕</button></td></tr>'});
+$('ahlist').innerHTML=h+'</tbody></table>';
+$('ahgen').innerHTML='<div>Total ahorrado<b class="in">'+money(tg+tp)+'</b></div><div>Guardado<b>'+money(tg)+'</b></div><div>En plazo fijo<b>'+money(tp)+'</b></div>'}
+
+/* ===== SEGURIDAD (cifrado AES-GCM + clave PBKDF2 derivada del código) ===== */
+var VKEY='libro-diario-enc',FK='libro-diario-fails',UK='libro-diario-until',ITER=250000,IDLE=180000;
+var cryptoKey=null,saltB=null,iterUsed=ITER,locked=true,chain=Promise.resolve(),idleT=null,hiddenAt=0,lkT=null;
+function b64(u){var s='';for(var i=0;i<u.length;i++)s+=String.fromCharCode(u[i]);return btoa(s)}
+function unb64(s){var b=atob(s),u=new Uint8Array(b.length);for(var i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u}
+async function deriveKey(code,salt,iter){var km=await crypto.subtle.importKey('raw',new TextEncoder().encode(code),'PBKDF2',false,['deriveKey']);
+return crypto.subtle.deriveKey({name:'PBKDF2',salt:salt,iterations:iter,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
+async function encJson(json,key,salt,iter){var iv=crypto.getRandomValues(new Uint8Array(12));
+var ct=await crypto.subtle.encrypt({name:'AES-GCM',iv:iv},key,new TextEncoder().encode(json));
+return {v:1,iter:iter,salt:b64(salt),iv:b64(iv),ct:b64(new Uint8Array(ct))}}
+async function decBlob(o,code){var salt=unb64(o.salt),key=await deriveKey(code,salt,o.iter);
+var pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(o.iv)},key,unb64(o.ct));
+return {key:key,salt:salt,iter:o.iter,data:JSON.parse(new TextDecoder().decode(pt))}}
+function snapshot(){return {items:items,envios:envios,cuotas:cuotas,ahorros:ahorros}}
+function loadState(d){items=Array.isArray(d.items)?d.items:[];envios=Array.isArray(d.envios)?d.envios:[];cuotas=Array.isArray(d.cuotas)?d.cuotas:[];ahorros=Array.isArray(d.ahorros)?d.ahorros:[]}
+function persist(){if(!cryptoKey)return chain;var json=JSON.stringify(snapshot()),k=cryptoKey,s=saltB,it=iterUsed;
+chain=chain.then(function(){return encJson(json,k,s,it)}).then(function(o){localStorage.setItem(VKEY,JSON.stringify(o))}).catch(function(){msg('No se pudo guardar. Revisá el espacio del navegador.')});
+return chain}
+function legacy(){function g(k){try{var v=JSON.parse(localStorage.getItem(k)||'null');return Array.isArray(v)?v:null}catch(e){return null}}
+return {items:g('libro-diario-v2')||g('libro-diario-v1')||[],envios:g('libro-diario-envios')||[],cuotas:g('libro-diario-cuotas')||[],ahorros:[]}}
+
+function showLock(mode){$('app').hidden=true;$('lock').hidden=false;$('lkU').hidden=mode!=='u';$('lkS').hidden=mode!=='s';
+if(mode==='u'){$('lerr').textContent='';lkTick();$('lcode').focus()}else{$('serr').textContent='';$('scode').focus()}}
+var waiting=false;
+function lkTick(){clearTimeout(lkT);var r=Math.ceil(((+localStorage.getItem(UK)||0)-Date.now())/1000);
+if(r>0){waiting=true;$('lbtn').disabled=true;$('lerr').textContent='Demasiados intentos. Esperá '+r+' s.';lkT=setTimeout(lkTick,500)}
+else{$('lbtn').disabled=false;if(waiting){waiting=false;$('lerr').textContent=''}}}
+function enterApp(){locked=false;$('lock').hidden=true;$('app').hidden=false;endEdit();cuEnd();ahEnd();draft=[];render();showTab('libro');window.scrollTo(0,0);bump()}
+function lockNow(){if(locked||!cryptoKey)return;locked=true;clearTimeout(idleT);
+items=[];envios=[];cuotas=[];ahorros=[];draft=[];cryptoKey=null;saltB=null;editId=null;editCu=null;editAh=null;
+['tabla','tot','elist','egen','clist','cgen','ahlist','ahgen','edraft','fmes','fcat','emes','ereg','cats','prev','cprev','etot'].forEach(function(i){var n=$(i);if(n){n.innerHTML='';n.textContent=''}});
+['f','ef','cf','af','ccf'].forEach(function(i){$(i).reset()});
+['ayuda','cc','pd'].forEach(function(i){var d=$(i);if(d.open)d.close()});
+$('lcode').value='';showLock('u')}
+function bump(){if(locked)return;clearTimeout(idleT);idleT=setTimeout(lockNow,IDLE)}
+['click','keydown','touchstart','scroll'].forEach(function(ev){addEventListener(ev,bump,{passive:true})});
+document.addEventListener('visibilitychange',function(){if(document.hidden){hiddenAt=Date.now()}else if(!locked&&hiddenAt&&Date.now()-hiddenAt>30000){lockNow()}});
+$('lkb').onclick=lockNow;
+
+$('lkU').onsubmit=async function(e){e.preventDefault();if($('lbtn').disabled)return;var code=$('lcode').value;
+$('lbtn').disabled=true;$('lerr').textContent='Verificando…';
+try{var r=await decBlob(JSON.parse(localStorage.getItem(VKEY)),code);
+localStorage.removeItem(FK);localStorage.removeItem(UK);
+cryptoKey=r.key;saltB=r.salt;iterUsed=r.iter;loadState(r.data);$('lcode').value='';$('lerr').textContent='';enterApp()}
+catch(err){var f=(+localStorage.getItem(FK)||0)+1;localStorage.setItem(FK,f);
+if(f>=5){localStorage.setItem(UK,Date.now()+Math.min(30*Math.pow(2,f-5),3600)*1000)}
+$('lcode').value='';$('lerr').textContent='Código incorrecto.';$('lbtn').disabled=false;lkTick()}};
+
+$('lkS').onsubmit=async function(e){e.preventDefault();var a=$('scode').value;
+if(a.length<4){$('serr').textContent='El código necesita al menos 4 caracteres.';return}
+if(a!==$('scode2').value){$('serr').textContent='Los códigos no coinciden.';return}
+$('serr').textContent='Protegiendo tus datos…';
+try{saltB=crypto.getRandomValues(new Uint8Array(16));iterUsed=ITER;cryptoKey=await deriveKey(a,saltB,iterUsed);
+loadState(legacy());await persist();
+if(!localStorage.getItem(VKEY))throw 0;
+['libro-diario-v2','libro-diario-v1','libro-diario-envios','libro-diario-cuotas'].forEach(function(k){localStorage.removeItem(k)});
+$('scode').value='';$('scode2').value='';enterApp()}
+catch(err){cryptoKey=null;$('serr').textContent='No se pudo activar el cifrado en este dispositivo.'}};
+
+$('lforg').onclick=function(){
+if(!confirm('Si no recordás el código, la única forma de volver a usar la app es borrar los datos de este dispositivo (después podés restaurar un respaldo si tenés el código del respaldo). ¿Borrar todo?'))return;
+if(!confirm('Última confirmación: se borrarán todos los datos guardados acá. ¿Seguro?'))return;
+localStorage.removeItem(VKEY);localStorage.removeItem(FK);localStorage.removeItem(UK);waiting=false;showLock('s')};
+
+$('ccb').onclick=function(){$('ccf').reset();$('cerr').textContent='';$('cc').showModal()};
+$('ccx').onclick=function(){$('cc').close()};
+$('ccf').onsubmit=async function(e){e.preventDefault();var a=$('c1').value;
+if(a.length<4){$('cerr').textContent='El código nuevo necesita al menos 4 caracteres.';return}
+if(a!==$('c2').value){$('cerr').textContent='Los códigos nuevos no coinciden.';return}
+$('cerr').textContent='Verificando…';
+try{await chain;await decBlob(JSON.parse(localStorage.getItem(VKEY)),$('c0').value)}catch(err){$('cerr').textContent='El código actual es incorrecto.';return}
+try{var s=crypto.getRandomValues(new Uint8Array(16)),k=await deriveKey(a,s,ITER);saltB=s;cryptoKey=k;iterUsed=ITER;await persist();
+$('cc').close();$('ccf').reset();msg('Código cambiado.')}catch(err){$('cerr').textContent='No se pudo cambiar el código.'}};
+
+function askCode(){return new Promise(function(res){var d=$('pd');$('pcode').value='';
+$('pform').onsubmit=function(e){e.preventDefault();var v=$('pcode').value;d.close();res(v)};
+$('pcancel').onclick=function(){d.close();res(null)};
+d.oncancel=function(){res(null)};d.showModal()})}
+
+$('bk').onclick=async function(){try{var o=await encJson(JSON.stringify(snapshot()),cryptoKey,saltB,iterUsed);
+dl(new Blob([JSON.stringify(o)],{type:'application/json'}),'respaldo-libro-diario.json');msg('Respaldo cifrado descargado. Para abrirlo hace falta tu código.')}
+catch(e){msg('No se pudo crear el respaldo.')}};
 $('rs').onclick=function(){$('rf').click()};
-$('rf').onchange=function(){var f=this.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var o=JSON.parse(r.result);if(!Array.isArray(o.items))throw 0;if(!confirm('Esto reemplaza los datos actuales. ¿Continuar?'))return;items=o.items;envios=o.envios||[];cuotas=o.cuotas||[];save();saveAll();render();envRender();cuRender();msg('Respaldo restaurado.')}catch(e){msg('El archivo no es un respaldo válido.')}};r.readAsText(f);this.value=''};
+$('rf').onchange=function(){var inp=this,f=inp.files[0];inp.value='';if(!f)return;var r=new FileReader();
+r.onload=async function(){try{var o=JSON.parse(r.result),d;
+if(o&&o.ct&&o.salt){
+if(o.salt===b64(saltB)&&o.iter===iterUsed){var pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(o.iv)},cryptoKey,unb64(o.ct));d=JSON.parse(new TextDecoder().decode(pt))}
+else{var code=await askCode();if(code===null)return;d=(await decBlob(o,code)).data}}
+else d=o;
+if(!d||!Array.isArray(d.items))throw 0;
+if(!confirm('Esto reemplaza los datos actuales. ¿Continuar?'))return;
+loadState(d);persist();render();envRender();cuRender();ahRender();msg('Respaldo restaurado.')}
+catch(e){msg('El archivo no es un respaldo válido, o el código es incorrecto.')}};r.readAsText(f)};
+
+function boot(){
+if(!(window.crypto&&crypto.subtle)){$('lock').hidden=false;$('app').hidden=true;$('lkU').hidden=true;$('lkS').hidden=true;
+var p=document.createElement('p');p.className='err';p.textContent='Este navegador no permite el cifrado. Abrí la app desde el link https:// y con un navegador actualizado.';$('lock').firstElementChild.appendChild(p);return}
+var has=false;try{has=!!localStorage.getItem(VKEY)}catch(e){}
+showLock(has?'u':'s')}
 if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}
 function setTema(t){document.documentElement.setAttribute('data-theme',t);try{localStorage.setItem('libro-diario-tema',t)}catch(e){}
 $('tema').textContent=t==='dark'?'Modo claro':'Modo oscuro';
@@ -371,7 +566,7 @@ var ay=$('ayuda');
 $('ayb').onclick=function(){if(ay.showModal)ay.showModal();else ay.setAttribute('open','')};
 $('ayc').onclick=function(){if(ay.close)ay.close();else ay.removeAttribute('open')};
 ay.addEventListener('click',function(e){if(e.target===ay)ay.close()});
-draw();prev();render();showTab('libro');
+draw();prev();boot();
 </script>
 </body>
 </html>

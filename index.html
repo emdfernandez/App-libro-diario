@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Libro diario</title>
+<meta name="theme-color" content="#1f2a44">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<style>
+:root{--paper:#eef3ec;--sheet:#f7faf5;--ink:#1f2a44;--rule:#b5cdbd;--margin:#c0392b;--in:#1e7b4f;--out:#b3261e;--mute:#5d6b7a;--field:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#121a17;--sheet:#18221e;--ink:#e3ebe6;--rule:#2f4a3c;--margin:#e0685a;--in:#5fd39a;--out:#ff8a80;--mute:#9db0a5;--field:#0f1613}}
+:root[data-theme="dark"]{--paper:#121a17;--sheet:#18221e;--ink:#e3ebe6;--rule:#2f4a3c;--margin:#e0685a;--in:#5fd39a;--out:#ff8a80;--mute:#9db0a5;--field:#0f1613}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:Georgia,'Times New Roman',serif;line-height:1.5}
+.em{font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji","Twemoji Mozilla",Georgia,"Times New Roman",serif}
+main{max-width:980px;margin:0 auto;padding:20px 14px 60px}
+h1{font-size:1.7rem;margin:0 0 2px}
+.sub{color:var(--mute);font-size:.85rem;margin:0 0 18px}
+.book{background:var(--sheet);border:1px solid var(--rule);border-left:3px double var(--margin);padding:16px;margin-bottom:18px;border-radius:2px}
+form{display:grid;gap:12px}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+label{display:grid;gap:4px;font-size:.8rem;color:var(--mute)}
+input,textarea,select{font:inherit;color:var(--ink);background:var(--field);border:1px solid var(--rule);padding:8px;border-radius:2px;width:100%}
+input:focus-visible,textarea:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
+textarea{resize:vertical;min-height:44px}
+.tipo{display:flex;gap:8px}
+.tipo button{flex:1;font:inherit;padding:9px;border:1.5px solid var(--rule);background:var(--field);color:var(--ink);cursor:pointer;border-radius:2px}
+.tipo button[aria-pressed=true].i{border-color:var(--in);background:var(--in);color:#fff}
+.tipo button[aria-pressed=true].e{border-color:var(--out);background:var(--out);color:#fff}
+.icons{display:flex;flex-wrap:wrap;gap:4px}
+.icons button{font-size:1.25rem;width:38px;height:38px;border:1px solid var(--rule);background:var(--field);cursor:pointer;border-radius:2px}
+.icons button[aria-pressed=true]{border:2px solid var(--ink);background:var(--rule)}
+.preview{font-size:.85rem;color:var(--mute)}
+.btns{display:flex;gap:8px}
+.add,.sec{font:inherit;padding:11px 14px;border:1px solid var(--ink);cursor:pointer;border-radius:2px}
+.add{flex:1;font-weight:700;background:var(--ink);color:var(--sheet)}
+.sec{background:none;color:var(--ink);font-size:.85rem;padding:8px 12px}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin-bottom:12px}
+.bar label{flex:1;min-width:140px}
+.wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:700px;font-size:.88rem}
+th{text-align:left;font-weight:700;border-bottom:2px solid var(--ink);padding:6px 8px;font-size:.8rem}
+td{padding:7px 8px;border-bottom:1px solid var(--rule);vertical-align:top}
+.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.in{color:var(--in)}.out{color:var(--out)}
+.nm{display:flex;gap:8px;align-items:flex-start}.nm>span:first-child{font-size:1.3rem;line-height:1.2}
+.obs{color:var(--mute);font-size:.8rem}
+.cat{display:inline-block;font-size:.72rem;border:1px solid var(--rule);padding:0 6px;border-radius:9px;color:var(--mute);margin-top:2px}
+.fecha td{background:var(--paper);font-weight:700;border-bottom:1px solid var(--ink);padding-top:12px}
+.sub-row td{font-weight:700;border-bottom:2px solid var(--rule);background:var(--paper)}
+.act{white-space:nowrap}
+.act button{border:0;background:none;color:var(--mute);cursor:pointer;font-size:1rem;padding:2px 6px}
+.act button:hover{color:var(--ink)}
+.total{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:14px;padding-top:12px;border-top:3px double var(--ink)}
+.total div{font-size:.8rem;color:var(--mute)}
+.total b{display:block;font-size:1.35rem;color:var(--ink);font-variant-numeric:tabular-nums}
+.empty{color:var(--mute);padding:20px 0;text-align:center}
+#msg{font-size:.8rem;color:var(--mute);min-height:1.2em;margin-bottom:8px}
+h2{font-size:1.05rem;margin:0 0 12px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:2px}
+.top h1{margin:0}
+.top .acts{display:flex;gap:8px;align-items:center}
+.pill,.help{font:inherit;font-size:.82rem;height:38px;border:1px solid var(--ink);background:none;color:var(--ink);cursor:pointer;border-radius:19px;padding:0 14px}
+.help{width:38px;padding:0;font-weight:700;font-size:1.05rem}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);margin:6px 0 10px;border:1.5px solid var(--ink);border-radius:2px;overflow:hidden}
+.tabs button{font:inherit;padding:11px 6px;border:0;border-left:1.5px solid var(--ink);background:none;color:var(--ink);cursor:pointer}
+.tabs button:first-child{border-left:0}
+.tabs button[aria-pressed=true]{background:var(--ink);color:var(--sheet);font-weight:700}
+.datos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px}
+.datos .sec{width:100%;height:38px;padding:0 6px}
+.row .sec{height:40px;align-self:end}
+.row .full{grid-column:1/-1;align-self:stretch}
+.sec{height:38px;line-height:1}
+dialog{width:min(560px,calc(100% - 28px));max-height:calc(100% - 40px);padding:0;border:1px solid var(--ink);border-radius:4px;background:var(--sheet);color:var(--ink);font-family:inherit}
+dialog::backdrop{background:rgba(0,0,0,.55)}
+.dh{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--rule);position:sticky;top:0;background:var(--sheet)}
+.dh h2{margin:0}
+.dh button{font:inherit;border:1px solid var(--ink);background:none;color:var(--ink);cursor:pointer;border-radius:2px;padding:6px 12px}
+.db{padding:6px 18px 18px;font-size:.9rem}
+.db h3{font-size:.95rem;margin:16px 0 4px}
+.db p{margin:0 0 6px}
+.db ul{margin:0;padding-left:18px}
+.db li{margin-bottom:3px}
+.card{border:1px solid var(--rule);padding:10px 12px;margin-bottom:10px;background:var(--paper)}
+.ch{display:flex;justify-content:space-between}
+.ln{display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px dotted var(--rule)}
+.tt{font-weight:700;border-bottom:0;border-top:2px solid var(--ink);margin-top:4px;padding-top:6px}
+.lnk{border:0;background:none;color:var(--mute);cursor:pointer;font:inherit}
+.dl{margin:0;padding-left:18px;font-size:.88rem}
+:root[data-theme="dark"]{color-scheme:dark}:root[data-theme="light"]{color-scheme:light}
+</style>
+</head>
+<body>
+<main>
+<div class="top"><h1>Libro diario</h1><div class="acts"><button class="pill" id="tema" type="button">Modo oscuro</button><button class="help" id="ayb" type="button" aria-label="Ayuda" title="Ayuda">?</button></div></div>
+<p class="sub">Registrá cada ingreso y egreso. El importe es cantidad × valor unitario.</p>
+<nav class="tabs" aria-label="Secciones"><button type="button" id="nb-libro" aria-pressed="true">Libro diario</button><button type="button" id="nb-envio" aria-pressed="false">Envío</button><button type="button" id="nb-cuotas" aria-pressed="false">Cuotas</button></nav>
+<div class="datos"><button class="sec" id="bk" type="button">Respaldo</button><button class="sec" id="rs" type="button">Restaurar</button><button class="sec" id="exp" type="button">Exportar a Excel</button><input type="file" id="rf" accept=".json,application/json" hidden></div>
+<div id="msg" role="status"></div>
+<div id="tab-libro">
+
+<section class="book">
+<form id="f">
+<div class="tipo" id="ftipo" role="group" aria-label="Tipo de movimiento">
+<button type="button" class="i" data-t="ingreso" aria-pressed="true">Ingreso</button>
+<button type="button" class="e" data-t="egreso" aria-pressed="false">Egreso</button>
+</div>
+<div class="row">
+<label>Nombre<input id="nombre" required placeholder="Ej: Harina"></label>
+<label>Categoría<input id="cat" list="cats" placeholder="Elegí o escribí una"><datalist id="cats"></datalist></label>
+<label>Fecha<input id="fecha" type="date" required></label>
+<label>Cantidad<input id="cant" type="number" min="0" step="any" value="1" required></label>
+<label>Valor unitario ($)<input id="valor" type="number" min="0" step="any" required placeholder="0"></label>
+</div>
+<label>Observaciones<textarea id="obs" placeholder="Opcional"></textarea></label>
+<div><div style="font-size:.8rem;color:var(--mute);margin-bottom:4px">Icono</div><div class="icons em" id="icons"></div></div>
+<div class="preview"><span class="em" id="prev"></span></div>
+<div class="btns"><button class="add" id="ok" type="submit">Agregar al libro</button><button class="sec" id="cancel" type="button" hidden>Cancelar</button></div>
+</form>
+</section>
+
+<section class="book">
+<div class="bar">
+<label>Mes<select id="fmes"></select></label>
+<label>Categoría<select id="fcat"></select></label>
+</div>
+<div class="wrap" id="tabla"></div>
+<div class="total" id="tot"></div>
+</section>
+</div>
+<div id="tab-envio" hidden>
+<section class="book"><h2>Nuevo envío</h2>
+<form id="ef">
+<div class="row"><label>Destinatario<input id="edest" placeholder="Ej: Mamá"></label><label>Monto a enviar ($)<input id="emonto" type="number" min="0" step="any" required></label></div>
+<div class="tipo" id="esig" role="group" aria-label="Descontar o sumar"><button type="button" class="e" data-s="-1" aria-pressed="true">Descontar</button><button type="button" class="i" data-s="1" aria-pressed="false">Sumar</button></div>
+<div class="row"><label>Mes<select id="emes"></select></label><label>Registro del libro diario<select id="ereg"></select></label></div>
+<div class="row"><label>Importe ($)<input id="edesc" type="number" min="0" step="any"></label><button class="sec" id="eadd" type="button" style="align-self:end">Agregar al envío</button></div>
+<div class="row"><label>Concepto sin registro<input id="mcon" placeholder="Ej: Comisión"></label><label>Importe ($)<input id="mmonto" type="number" min="0" step="any"></label><button class="sec full" id="madd" type="button">Agregar sin registro</button></div>
+<ul id="edraft" class="dl"></ul><div class="preview" id="etot"></div>
+<button class="add" type="submit">Guardar envío</button>
+</form></section>
+<section class="book"><h2>Envíos</h2><div id="elist"></div><div class="total" id="egen"></div></section>
+</div>
+<div id="tab-cuotas" hidden>
+<section class="book"><h2>Nuevo producto en cuotas (informativo)</h2>
+<form id="cf">
+<div class="row"><label>Producto<input id="cprod" required placeholder="Ej: Heladera"></label><label>Cuotas restantes<input id="cresta" type="number" min="0" step="1" required></label><label>Valor de la cuota ($)<input id="cvalor" type="number" min="0" step="any" required></label></div>
+<div class="preview" id="cprev"></div>
+<div class="btns"><button class="add" id="cok" type="submit">Agregar cuota</button><button class="sec" id="ccancel" type="button" hidden>Cancelar</button></div>
+</form></section>
+<section class="book"><h2>Cuotas</h2><div class="wrap" id="clist"></div><div class="total" id="cgen"></div></section>
+</div>
+</main>
+<dialog id="ayuda" aria-labelledby="ayt">
+<div class="dh"><h2 id="ayt">Cómo usar la app</h2><button type="button" id="ayc">Cerrar</button></div>
+<div class="db">
+<h3>Libro diario</h3>
+<ul>
+<li>Elegí <b>Ingreso</b> o <b>Egreso</b>, escribí el nombre, la fecha, la cantidad y el valor unitario. El importe es cantidad × valor (2 unidades de $500 = $1.000).</li>
+<li>La categoría, las observaciones y el icono son opcionales. Tocá <b>Agregar al libro</b> para guardar.</li>
+<li>Los movimientos se agrupan por día, con subtotal y saldo de cada día. Abajo ves el total de ingresos, de egresos y el total general.</li>
+<li><b>✎</b> edita un movimiento y <b>✕</b> lo elimina. Con los filtros de mes y categoría ves solo una parte del libro.</li>
+</ul>
+<h3>Envío</h3>
+<ul>
+<li>Cargá el destinatario y el monto a enviar (por ejemplo, $100 a tu mamá).</li>
+<li>Elegí <b>Descontar</b> o <b>Sumar</b>, después el mes y el registro del libro. El importe propuesto es el del registro, pero lo podés cambiar (por ejemplo, $5). Tocá <b>Agregar al envío</b>.</li>
+<li>Para algo que no está en el libro, usá <b>Concepto sin registro</b>: escribís el concepto y el importe, y respeta Descontar o Sumar.</li>
+<li>Podés mezclar varios ítems. Mientras armás el envío ves el total final, y al tocar <b>Guardar envío</b> queda en la lista con el detalle y el total general de todos los envíos.</li>
+</ul>
+<h3>Cuotas</h3>
+<ul>
+<li>Es solo informativa. Cargá el producto, las cuotas restantes y el valor de la cuota.</li>
+<li>Te muestra cuánto falta pagar por producto (cuotas × valor) y el total de todos los productos.</li>
+</ul>
+<h3>Botones de arriba</h3>
+<ul>
+<li><b>Modo oscuro / claro:</b> cambia el aspecto de la app y recuerda tu elección.</li>
+<li><b>Respaldo:</b> descarga un archivo con todos tus datos (libro, envíos y cuotas).</li>
+<li><b>Restaurar:</b> recupera los datos desde ese archivo. Reemplaza los datos que haya en ese momento.</li>
+<li><b>Exportar a Excel:</b> descarga un archivo con tres hojas (Libro diario, Envío y Cuotas). Incluye todos los movimientos, sin aplicar los filtros.</li>
+</ul>
+<h3>Importante</h3>
+<p>Los datos se guardan solo en este celular. Si borrás los datos del navegador o cambiás de teléfono se pierden, así que hacé un <b>Respaldo</b> de vez en cuando.</p>
+</div>
+</dialog>
+<script>
+var ICONS=['💰','💵','🛒','🍞','🍖','🍎','☕','🍴','⛽','🚗','🚌','🏠','💡','📱','👕','💊','🎁','🔧','📦','📄','💼','🎓','🎬','🏦'];
+var BASE=['Ventas','Compras','Servicios','Sueldos','Transporte','Alimentos','Impuestos','Otros'];
+var KEY='libro-diario-v2',items=[],tipo='ingreso',icono=ICONS[0],editId=null;
+try{items=JSON.parse(localStorage.getItem(KEY)||localStorage.getItem('libro-diario-v1')||'[]')}catch(e){items=[]}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(items))}catch(e){}}
+var $=function(i){return document.getElementById(i)};
+var money=function(n){return '$ '+n.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})};
+var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+var MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+function fmtDate(d){var p=d.split('-');return p[2]+'/'+p[1]+'/'+p[0]}
+function mesLabel(m){var p=m.split('-');return MESES[+p[1]-1]+' '+p[0]}
+function reset(){$('fecha').value=new Date().toISOString().slice(0,10)}
+reset();
+
+ICONS.forEach(function(ic){var b=document.createElement('button');b.type='button';b.textContent=ic;b.setAttribute('aria-label','Icono '+ic);
+b.onclick=function(){icono=ic;draw();prev()};$('icons').appendChild(b)});
+function draw(){[].forEach.call($('icons').children,function(b){b.setAttribute('aria-pressed',b.textContent===icono)})}
+function setTipo(t){tipo=t;document.querySelectorAll('#ftipo button').forEach(function(x){x.setAttribute('aria-pressed',x.dataset.t===t)});prev()}
+document.querySelectorAll('#ftipo button').forEach(function(b){b.onclick=function(){setTipo(b.dataset.t)}});
+function prev(){var c=parseFloat($('cant').value)||0,v=parseFloat($('valor').value)||0;
+$('prev').textContent=icono+' '+($('nombre').value||'Sin nombre')+' — '+c+' × '+money(v)+' = '+money(c*v)+(tipo==='egreso'?' (egreso)':' (ingreso)')}
+['nombre','cant','valor'].forEach(function(i){$(i).oninput=prev});
+
+function cats(){var s=BASE.slice();items.forEach(function(x){if(x.cat&&s.indexOf(x.cat)<0)s.push(x.cat)});return s}
+
+$('f').onsubmit=function(e){e.preventDefault();
+var o={tipo:tipo,icono:icono,nombre:$('nombre').value.trim(),cat:$('cat').value.trim(),fecha:$('fecha').value,
+cant:parseFloat($('cant').value)||0,valor:parseFloat($('valor').value)||0,obs:$('obs').value.trim()};
+if(editId){items=items.map(function(x){return x.id===editId?Object.assign({},o,{id:editId}):x})}
+else{o.id=Date.now();items.push(o)}
+save();endEdit();render()};
+
+function endEdit(){editId=null;$('f').reset();$('cant').value=1;reset();setTipo('ingreso');icono=ICONS[0];draw();
+$('ok').textContent='Agregar al libro';$('cancel').hidden=true;prev()}
+$('cancel').onclick=endEdit;
+function edit(id){var x=items.filter(function(i){return i.id===id})[0];if(!x)return;editId=id;
+$('nombre').value=x.nombre;$('cat').value=x.cat||'';$('fecha').value=x.fecha;$('cant').value=x.cant;$('valor').value=x.valor;$('obs').value=x.obs||'';
+icono=x.icono;draw();setTipo(x.tipo);$('ok').textContent='Guardar cambios';$('cancel').hidden=false;
+$('f').scrollIntoView({behavior:'smooth'});$('nombre').focus()}
+function del(id){if(editId===id)endEdit();items=items.filter(function(x){return x.id!==id});save();render()}
+
+function fill(sel,opts,cur){sel.innerHTML=opts.map(function(o){return '<option value="'+esc(o[0])+'"'+(o[0]===cur?' selected':'')+'>'+esc(o[1])+'</option>'}).join('')}
+function filters(){
+var ms={};items.forEach(function(x){ms[x.fecha.slice(0,7)]=1});
+var ml=Object.keys(ms).sort().reverse(),cm=$('fmes').value||'',cc=$('fcat').value||'';
+fill($('fmes'),[['','Todos los meses']].concat(ml.map(function(m){return [m,mesLabel(m)]})),cm);
+var cl=cats();fill($('fcat'),[['','Todas las categorías']].concat(cl.map(function(c){return [c,c]})),cc);
+$('cats').innerHTML=cl.map(function(c){return '<option value="'+esc(c)+'">'}).join('')}
+$('fmes').onchange=$('fcat').onchange=function(){render(true)};
+function view(){var m=$('fmes').value,c=$('fcat').value;
+return items.filter(function(x){return (!m||x.fecha.slice(0,7)===m)&&(!c||x.cat===c)})}
+
+function render(keep){
+if(!keep)filters();
+var list=view();
+if(!list.length){$('tabla').innerHTML='<p class="empty">'+(items.length?'No hay movimientos con ese filtro.':'Todavía no hay movimientos. Agregá el primero arriba.')+'</p>';$('tot').innerHTML='';return}
+var days={};list.forEach(function(x){(days[x.fecha]=days[x.fecha]||[]).push(x)});
+var h='<table><thead><tr><th>Concepto</th><th class="n">Cant.</th><th class="n">Unitario</th><th class="n">Ingreso</th><th class="n">Egreso</th><th></th></tr></thead><tbody>';
+var TI=0,TE=0;
+Object.keys(days).sort().forEach(function(d){
+var si=0,se=0;h+='<tr class="fecha"><td colspan="6">'+fmtDate(d)+'</td></tr>';
+days[d].forEach(function(x){var imp=x.cant*x.valor,isI=x.tipo==='ingreso';if(isI)si+=imp;else se+=imp;
+h+='<tr><td><div class="nm"><span class="em">'+x.icono+'</span><span>'+esc(x.nombre)+(x.cat?'<br><span class="cat">'+esc(x.cat)+'</span>':'')+(x.obs?'<div class="obs">'+esc(x.obs)+'</div>':'')+'</span></div></td>'+
+'<td class="n">'+x.cant+'</td><td class="n">'+money(x.valor)+'</td>'+
+'<td class="n in">'+(isI?money(imp):'')+'</td><td class="n out">'+(isI?'':money(imp))+'</td>'+
+'<td class="act"><button aria-label="Editar '+esc(x.nombre)+'" onclick="edit('+x.id+')">✎</button><button aria-label="Eliminar '+esc(x.nombre)+'" onclick="del('+x.id+')">✕</button></td></tr>'});
+h+='<tr class="sub-row"><td colspan="3">Subtotal del '+fmtDate(d)+'</td><td class="n in">'+money(si)+'</td><td class="n out">'+money(se)+'</td><td></td></tr>';
+h+='<tr class="sub-row"><td colspan="3">Saldo del día</td><td class="n" colspan="2">'+money(si-se)+'</td><td></td></tr>';
+TI+=si;TE+=se});
+$('tabla').innerHTML=h+'</tbody></table>';
+var tot=TI-TE;
+$('tot').innerHTML='<div>Total ingresos<b class="in">'+money(TI)+'</b></div><div>Total egresos<b class="out">'+money(TE)+'</b></div><div>Total general<b class="'+(tot<0?'out':'in')+'">'+money(tot)+'</b></div>'}
+
+var envios=[],cuotas=[],draft=[],editCu=null;
+try{envios=JSON.parse(localStorage.getItem('libro-diario-envios')||'[]')}catch(e){envios=[]}
+try{cuotas=JSON.parse(localStorage.getItem('libro-diario-cuotas')||'[]')}catch(e){cuotas=[]}
+function saveAll(){try{localStorage.setItem('libro-diario-envios',JSON.stringify(envios));localStorage.setItem('libro-diario-cuotas',JSON.stringify(cuotas))}catch(e){}}
+function showTab(t){['libro','envio','cuotas'].forEach(function(x){$('tab-'+x).hidden=x!==t;$('nb-'+x).setAttribute('aria-pressed',x===t)});if(t==='envio')envRender();if(t==='cuotas')cuRender()}
+['libro','envio','cuotas'].forEach(function(x){$('nb-'+x).onclick=function(){showTab(x)}});
+var imp=function(x){return x.cant*x.valor};
+function regOpts(){var ms={};items.forEach(function(x){ms[x.fecha.slice(0,7)]=1});var ml=Object.keys(ms).sort().reverse(),cur=$('emes').value;
+if(cur!=='*'&&ml.indexOf(cur)<0)cur=ml[0]||'*';
+$('emes').innerHTML=ml.map(function(m){return '<option value="'+m+'"'+(m===cur?' selected':'')+'>'+mesLabel(m)+'</option>'}).join('')+'<option value="*"'+(cur==='*'?' selected':'')+'>Todos los meses</option>';
+var l=items.filter(function(x){return cur==='*'||x.fecha.slice(0,7)===cur}).sort(function(a,b){return a.fecha<b.fecha?1:-1});
+$('ereg').innerHTML=l.length?l.map(function(x){return '<option value="'+x.id+'">'+esc(x.icono+' '+x.nombre+' \u2014 '+money(imp(x))+' ('+fmtDate(x.fecha)+')')+'</option>'}).join(''):'<option value="">No hay registros en este mes</option>';regAmt()}
+function regAmt(){var x=items.filter(function(i){return String(i.id)===$('ereg').value})[0];$('edesc').value=x?imp(x):''}
+$('ereg').onchange=regAmt;
+$('emes').onchange=regOpts;
+$('eadd').onclick=function(){var x=items.filter(function(i){return String(i.id)===$('ereg').value})[0],m=parseFloat($('edesc').value);
+if(!x||!(m>=0))return;draft.push({nombre:x.nombre,icono:x.icono,monto:m,sig:sig});drawDraft()};
+var sig=-1,sg=function(d){return d.sig===1?1:-1};
+document.querySelectorAll('#esig button').forEach(function(b){b.onclick=function(){sig=+b.dataset.s;document.querySelectorAll('#esig button').forEach(function(x){x.setAttribute('aria-pressed',x===b)})}});
+function drawDraft(){var m=parseFloat($('emonto').value)||0,s=0;
+$('edraft').innerHTML=draft.map(function(d,i){s+=sg(d)*d.monto;return '<li><span class="em">'+d.icono+'</span> '+esc(d.nombre)+' <b class="'+(sg(d)>0?'in':'out')+'">'+(sg(d)>0?'+ ':'\u2212 ')+money(d.monto)+'</b> <button type="button" class="lnk" aria-label="Quitar" onclick="draft.splice('+i+',1);drawDraft()">\u2715</button></li>'}).join('');
+$('etot').textContent='Total final de este env\u00edo: '+money(m+s)}
+$('emonto').oninput=drawDraft;
+$('madd').onclick=function(){var m=parseFloat($('mmonto').value);if(!(m>=0))return;draft.push({nombre:$('mcon').value.trim()||'Sin concepto',icono:'📝',monto:m,sig:sig});$('mcon').value='';$('mmonto').value='';drawDraft()};
+$('ef').onsubmit=function(e){e.preventDefault();
+envios.push({id:Date.now(),dest:$('edest').value.trim(),monto:parseFloat($('emonto').value)||0,desc:draft.slice()});
+saveAll();draft=[];$('ef').reset();envRender()};
+function envFinal(v){return v.monto+v.desc.reduce(function(a,d){return a+sg(d)*d.monto},0)}
+function envRender(){regOpts();drawDraft();
+if(!envios.length){$('elist').innerHTML='<p class="empty">Todavía no hay envíos.</p>';$('egen').innerHTML='';return}
+var g=0;
+$('elist').innerHTML=envios.map(function(v){var f=envFinal(v);g+=f;
+return '<div class="card"><div class="ch"><b>'+esc(v.dest||'Sin destinatario')+'</b><button class="lnk" aria-label="Eliminar envío" onclick="envDel('+v.id+')">✕</button></div>'+
+'<div class="ln"><span>Monto a enviar</span><span class="n">'+money(v.monto)+'</span></div>'+
+v.desc.map(function(d){return '<div class="ln"><span><span class="em">'+d.icono+'</span> '+esc(d.nombre)+'</span><span class="n '+(sg(d)>0?'in':'out')+'">'+(sg(d)>0?'+ ':'− ')+money(d.monto)+'</span></div>'}).join('')+
+'<div class="ln tt"><span>Total final</span><span class="n">'+money(f)+'</span></div></div>'}).join('');
+$('egen').innerHTML='<div>Total general de envíos<b class="'+(g<0?'out':'in')+'">'+money(g)+'</b></div>'}
+function envDel(id){envios=envios.filter(function(v){return v.id!==id});saveAll();envRender()}
+
+$('cf').onsubmit=function(e){e.preventDefault();
+var o={prod:$('cprod').value.trim(),resta:parseFloat($('cresta').value)||0,valor:parseFloat($('cvalor').value)||0};
+if(editCu){cuotas=cuotas.map(function(c){return c.id===editCu?Object.assign({},o,{id:editCu}):c})}else{o.id=Date.now();cuotas.push(o)}
+saveAll();cuEnd();cuRender()};
+function cuEnd(){editCu=null;$('cf').reset();$('cok').textContent='Agregar cuota';$('ccancel').hidden=true;cuPrev()}
+$('ccancel').onclick=cuEnd;
+function cuEdit(id){var c=cuotas.filter(function(x){return x.id===id})[0];if(!c)return;editCu=id;$('cprod').value=c.prod;$('cresta').value=c.resta;$('cvalor').value=c.valor;$('cok').textContent='Guardar cambios';$('ccancel').hidden=false;$('cprod').focus();cuPrev()}
+function cuDel(id){if(editCu===id)cuEnd();cuotas=cuotas.filter(function(c){return c.id!==id});saveAll();cuRender()}
+function cuPrev(){var r=parseFloat($('cresta').value)||0,v=parseFloat($('cvalor').value)||0;$('cprev').textContent=r+' cuotas × '+money(v)+' = '+money(r*v)+' que falta pagar'}
+['cresta','cvalor'].forEach(function(i){$(i).oninput=cuPrev});
+function cuRender(){cuPrev();
+if(!cuotas.length){$('clist').innerHTML='<p class="empty">Todavía no hay productos en cuotas.</p>';$('cgen').innerHTML='';return}
+var g=0,h='<table><thead><tr><th>Producto</th><th class="n">Cuotas restantes</th><th class="n">Valor de la cuota</th><th class="n">Falta pagar</th><th></th></tr></thead><tbody>';
+cuotas.forEach(function(c){var t=c.resta*c.valor;g+=t;h+='<tr><td>'+esc(c.prod)+'</td><td class="n">'+c.resta+'</td><td class="n">'+money(c.valor)+'</td><td class="n"><b>'+money(t)+'</b></td><td class="act"><button aria-label="Editar '+esc(c.prod)+'" onclick="cuEdit('+c.id+')">✎</button><button aria-label="Eliminar '+esc(c.prod)+'" onclick="cuDel('+c.id+')">✕</button></td></tr>'});
+$('clist').innerHTML=h+'</tbody></table>';
+$('cgen').innerHTML='<div>Total que falta pagar en cuotas<b class="out">'+money(g)+'</b></div>'}
+
+function msg(t){$('msg').textContent=t}
+$('exp').onclick=async function(){
+var sorted=items.slice().sort(function(a,b){return a.fecha<b.fecha?-1:a.fecha>b.fecha?1:a.id-b.id});
+var L=[['Fecha','Tipo','Nombre','Categoría','Observaciones','Cantidad','Valor unitario','Importe']],TI=0,TE=0;
+sorted.forEach(function(x){var m=imp(x);if(x.tipo==='ingreso')TI+=m;else TE+=m;L.push([fmtDate(x.fecha),x.tipo,x.nombre,x.cat||'',x.obs||'',x.cant,x.valor,x.tipo==='egreso'?-m:m])});
+L.push([],['','','','','','','Total ingresos',TI],['','','','','','','Total egresos',-TE],['','','','','','','Total general',TI-TE]);
+var E=[['Destinatario','Concepto','Importe']],G=0;
+envios.forEach(function(v){var f=envFinal(v);G+=f;E.push([v.dest||'Sin destinatario','Monto a enviar',v.monto]);v.desc.forEach(function(d){E.push(['',(sg(d)>0?'Suma: ':'Descuento: ')+d.nombre,sg(d)*d.monto])});E.push(['','Total final',f],[])});
+E.push(['','TOTAL GENERAL DE ENVÍOS',G]);
+var C=[['Producto','Cuotas restantes','Valor de la cuota','Falta pagar']],CT=0;
+cuotas.forEach(function(c){var t=c.resta*c.valor;CT+=t;C.push([c.prod,c.resta,c.valor,t])});
+C.push([],['','','TOTAL QUE FALTA',CT]);
+dl(xlsx([['Libro diario',L],['Envío',E],['Cuotas',C]]),'libro-diario.xlsx');msg('Excel descargado con tres hojas: Libro diario, Envío y Cuotas.')};
+/*XLSX*/
+function crc(b){var c,t=crc.t;if(!t){t=crc.t=[];for(var n=0;n<256;n++){c=n;for(var k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}}c=-1;for(var i=0;i<b.length;i++)c=t[(c^b[i])&255]^(c>>>8);return(c^-1)>>>0}
+function zip(files){var enc=new TextEncoder(),out=[],cd=[],off=0;
+function u16(n){return [n&255,n>>>8&255]}function u32(n){return [n&255,n>>>8&255,n>>>16&255,n>>>24&255]}
+files.forEach(function(f){var nm=enc.encode(f[0]),d=enc.encode(f[1]),c=crc(d);
+var h=[].concat([0x50,0x4b,3,4],u16(20),u16(0x0800),u16(0),u16(0),u16(0x21),u32(c),u32(d.length),u32(d.length),u16(nm.length),u16(0));
+out.push(new Uint8Array(h),nm,d);
+cd.push(new Uint8Array([].concat([0x50,0x4b,1,2],u16(20),u16(20),u16(0x0800),u16(0),u16(0),u16(0x21),u32(c),u32(d.length),u32(d.length),u16(nm.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(off))),nm);
+off+=h.length+nm.length+d.length});
+var cs=0;cd.forEach(function(x){cs+=x.length});
+var end=new Uint8Array([].concat([0x50,0x4b,5,6],u16(0),u16(0),u16(files.length),u16(files.length),u32(cs),u32(off),u16(0)));
+return new Blob(out.concat(cd,[end]),{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})}
+function sheetXml(rows){var x='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><cols><col min="1" max="8" width="22" customWidth="1"/></cols><sheetData>';
+rows.forEach(function(r,i){x+='<row r="'+(i+1)+'">';r.forEach(function(v,j){if(v===''||v==null)return;var ref=String.fromCharCode(65+j)+(i+1);
+x+=typeof v==='number'?'<c r="'+ref+'"><v>'+v+'</v></c>':'<c r="'+ref+'" t="inlineStr"><is><t>'+esc(v)+'</t></is></c>'});x+='</row>'});
+return x+'</sheetData></worksheet>'}
+function xlsx(sheets){var H='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',R='http://schemas.openxmlformats.org/officeDocument/2006/relationships',P='http://schemas.openxmlformats.org/package/2006/relationships';
+var f=[['[Content_Types].xml',H+'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'+sheets.map(function(s,i){return '<Override PartName="/xl/worksheets/sheet'+(i+1)+'.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'}).join('')+'</Types>'],
+['_rels/.rels',H+'<Relationships xmlns="'+P+'"><Relationship Id="rId1" Type="'+R+'/officeDocument" Target="xl/workbook.xml"/></Relationships>'],
+['xl/workbook.xml',H+'<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="'+R+'"><sheets>'+sheets.map(function(s,i){return '<sheet name="'+s[0]+'" sheetId="'+(i+1)+'" r:id="rId'+(i+1)+'"/>'}).join('')+'</sheets></workbook>'],
+['xl/_rels/workbook.xml.rels',H+'<Relationships xmlns="'+P+'">'+sheets.map(function(s,i){return '<Relationship Id="rId'+(i+1)+'" Type="'+R+'/worksheet" Target="worksheets/sheet'+(i+1)+'.xml"/>'}).join('')+'</Relationships>']];
+sheets.forEach(function(s,i){f.push(['xl/worksheets/sheet'+(i+1)+'.xml',sheetXml(s[1])])});
+return zip(f)}
+/*END*/
+function dl(blob,name){var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(a.href)},2000)}
+$('bk').onclick=function(){dl(new Blob([JSON.stringify({items:items,envios:envios,cuotas:cuotas})],{type:'application/json'}),'respaldo-libro-diario.json');msg('Respaldo descargado.')};
+$('rs').onclick=function(){$('rf').click()};
+$('rf').onchange=function(){var f=this.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var o=JSON.parse(r.result);if(!Array.isArray(o.items))throw 0;if(!confirm('Esto reemplaza los datos actuales. ¿Continuar?'))return;items=o.items;envios=o.envios||[];cuotas=o.cuotas||[];save();saveAll();render();envRender();cuRender();msg('Respaldo restaurado.')}catch(e){msg('El archivo no es un respaldo válido.')}};r.readAsText(f);this.value=''};
+if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}
+function setTema(t){document.documentElement.setAttribute('data-theme',t);try{localStorage.setItem('libro-diario-tema',t)}catch(e){}
+$('tema').textContent=t==='dark'?'Modo claro':'Modo oscuro';
+var m=document.querySelector('meta[name=theme-color]');if(m)m.content=t==='dark'?'#121a17':'#1f2a44'}
+$('tema').onclick=function(){setTema(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark')};
+var t0=null;try{t0=localStorage.getItem('libro-diario-tema')}catch(e){}
+setTema(t0||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
+var ay=$('ayuda');
+$('ayb').onclick=function(){if(ay.showModal)ay.showModal();else ay.setAttribute('open','')};
+$('ayc').onclick=function(){if(ay.close)ay.close();else ay.removeAttribute('open')};
+ay.addEventListener('click',function(e){if(e.target===ay)ay.close()});
+draw();prev();render();showTab('libro');
+</script>
+</body>
+</html>

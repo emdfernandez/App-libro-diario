@@ -1,0 +1,7 @@
+LIBRO DIARIO - app instalable (PWA)
+1) Subí TODOS estos archivos a un hosting con HTTPS (GitHub Pages, Netlify, Cloudflare Pages).
+2) Abrí el link en el celular.
+   Android (Chrome): menú ⋮ > "Instalar app" / "Agregar a pantalla de inicio".
+   iPhone (Safari): Compartir > "Añadir a pantalla de inicio".
+3) Los datos quedan guardados en ese celular. Usá "Respaldo" para guardarlos y "Restaurar" para recuperarlos.
+Si modificás index.html, cambiá el número en sw.js (libro-diario-v5 -> v6) para que se actualice.

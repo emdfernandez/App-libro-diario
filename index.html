@@ -99,6 +99,8 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
 .badge.pf{border-color:var(--ink);color:var(--ink)}
 .fin-s{font-size:.8rem;color:var(--mute)}.fin-s.warn{color:var(--out);font-weight:700}
 .ulink{text-align:center;text-decoration:underline}
+.ck{display:flex;align-items:center;gap:8px;color:var(--ink);font-size:.88rem}.ck input{width:auto}
+.datos .dng{color:var(--out);border-color:var(--out)}
 [hidden]{display:none!important}
 :root[data-theme="dark"]{color-scheme:dark}:root[data-theme="light"]{color-scheme:light}
 </style>
@@ -118,9 +120,31 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
 <p class="sub" style="margin:0">Creá un código para proteger tus datos. Se guardan cifrados: sin el código no se pueden abrir.</p>
 <label>Código nuevo<input id="scode" type="password" autocomplete="off" required></label>
 <label>Repetí el código<input id="scode2" type="password" autocomplete="off" required></label>
-<div class="preview">Mínimo 4 caracteres; mejor 6 o más, con números y letras. Si lo olvidás no hay forma de recuperarlo.</div>
+<div class="preview">Mínimo 4 caracteres; mejor 6 o más, con números y letras.</div>
+<label>Pregunta secreta<input id="sq" autocomplete="off" required placeholder="Ej: ¿Cómo se llamaba mi primera mascota?"></label>
+<label>Respuesta<input id="sa" autocomplete="off" autocapitalize="off" required></label>
+<div class="preview">Si olvidás el código, esta pregunta te deja crear uno nuevo. Elegí una respuesta que solo vos sepas: quien la conozca podrá abrir tus datos. No distingue mayúsculas ni tildes.</div>
 <div class="err" id="serr" role="alert"></div>
-<button class="add" type="submit">Guardar código y entrar</button>
+<button class="add" type="submit">Guardar y entrar</button>
+</form>
+<form id="lkQ" hidden>
+<p class="sub" style="margin:0">Ahora podés recuperar el acceso si olvidás el código. Escribí una pregunta secreta y su respuesta.</p>
+<label>Pregunta secreta<input id="mq" autocomplete="off" required placeholder="Ej: ¿Cómo se llamaba mi primera mascota?"></label>
+<label>Respuesta<input id="ma" autocomplete="off" autocapitalize="off" required></label>
+<div class="preview">Elegí una respuesta que solo vos sepas: quien la conozca podrá abrir tus datos. No distingue mayúsculas ni tildes.</div>
+<div class="err" id="mqerr" role="alert"></div>
+<button class="add" type="submit">Guardar y entrar</button>
+</form>
+<form id="lkR" hidden>
+<p class="sub" style="margin:0">Respondé tu pregunta secreta para crear un código nuevo.</p>
+<div><b id="rq"></b></div>
+<label>Respuesta<input id="ra" autocomplete="off" autocapitalize="off" required></label>
+<label>Código nuevo<input id="rc1" type="password" autocomplete="off" required></label>
+<label>Repetí el código nuevo<input id="rc2" type="password" autocomplete="off" required></label>
+<div class="err" id="rerr" role="alert"></div>
+<button class="add" id="rbtn" type="submit">Crear código nuevo</button>
+<button class="lnk ulink" id="rback" type="button">Volver</button>
+<button class="lnk ulink" id="rwipe" type="button">Borrar todo y empezar de nuevo</button>
 </form>
 </section>
 </div>
@@ -128,7 +152,7 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
 <div class="top"><h1>Libro diario</h1><div class="acts"><button class="help em" id="lkb" type="button" aria-label="Bloquear ahora" title="Bloquear ahora">🔒</button><button class="pill" id="tema" type="button">Modo oscuro</button><button class="help" id="ayb" type="button" aria-label="Ayuda" title="Ayuda">?</button></div></div>
 <p class="sub">Registrá cada ingreso y egreso. El importe es cantidad × valor unitario.</p>
 <nav class="tabs" aria-label="Secciones"><button type="button" id="nb-libro" aria-pressed="true">Libro diario</button><button type="button" id="nb-envio" aria-pressed="false">Envío</button><button type="button" id="nb-cuotas" aria-pressed="false">Cuotas</button><button type="button" id="nb-ahorro" aria-pressed="false">Ahorro</button></nav>
-<div class="datos"><button class="sec" id="bk" type="button">Respaldo</button><button class="sec" id="rs" type="button">Restaurar</button><button class="sec" id="exp" type="button">Exportar a Excel</button><button class="sec" id="ccb" type="button">Cambiar código</button><input type="file" id="rf" accept=".json,application/json" hidden></div>
+<div class="datos"><button class="sec" id="bk" type="button">Respaldo</button><button class="sec" id="rs" type="button">Restaurar</button><button class="sec" id="exp" type="button">Exportar a Excel</button><button class="sec" id="ccb" type="button">Seguridad</button><button class="sec dng" id="dpb" type="button">Borrar por período</button><input type="file" id="rf" accept=".json,application/json" hidden></div>
 <div id="msg" role="status"></div>
 <div id="tab-libro">
 
@@ -227,7 +251,15 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
 <li>Tus datos se guardan <b>cifrados</b> con tu código. Sin el código no se pueden leer, ni siquiera mirando el almacenamiento del navegador.</li>
 <li>La app se bloquea sola a los 3 minutos sin usarla, o si la dejás en segundo plano más de 30 segundos. También podés tocar el 🔒 de arriba.</li>
 <li>Tras 5 intentos fallidos hay que esperar antes de volver a probar.</li>
-<li><b>Si olvidás el código no se puede recuperar.</b> Guardá un respaldo y anotá el código en un lugar seguro.</li>
+<li><b>Pregunta secreta:</b> la primera vez escribís una pregunta y su respuesta. Si olvidás el código, tocá <b>Olvidé mi código</b>, respondé la pregunta y elegí uno nuevo. La respuesta no distingue mayúsculas ni tildes.</li>
+<li>Elegí una respuesta que solo vos sepas: quien la conozca puede abrir tus datos.</li>
+<li>Si olvidás el código <b>y</b> la respuesta, no se pueden recuperar los datos. Guardá un respaldo y anotá el código en un lugar seguro.</li>
+</ul>
+<h3>Borrar por período</h3>
+<ul>
+<li>Elegí <b>Un año</b> o <b>Un mes</b>, después el período, y la app te dice cuántos movimientos se borran.</li>
+<li>Borra los movimientos del libro diario. Podés incluir también los envíos que hiciste en ese período. Las cuotas y los ahorros no se tocan.</li>
+<li>Por defecto descarga un respaldo antes de borrar. No se puede deshacer.</li>
 </ul>
 <h3>Botones de arriba</h3>
 <ul>
@@ -235,7 +267,8 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
 <li><b>Respaldo:</b> descarga un archivo cifrado con todos tus datos (libro, envíos, cuotas y ahorro). Para abrirlo hace falta el código.</li>
 <li><b>Restaurar:</b> recupera los datos desde ese archivo. Reemplaza los datos que haya en ese momento.</li>
 <li><b>Exportar a Excel:</b> descarga un archivo con cuatro hojas (Libro diario, Envío, Cuotas y Ahorro). Incluye todos los movimientos, sin aplicar los filtros. <b>Ojo:</b> el Excel no queda protegido con código.</li>
-<li><b>Cambiar código:</b> cambia el código de seguridad (pide el actual).</li>
+<li><b>Seguridad:</b> cambia el código o la pregunta secreta (pide el código actual).</li>
+<li><b>Borrar por período:</b> borra los movimientos de un año o de un mes (ver más abajo).</li>
 <li><b>🔒:</b> bloquea la app ahora mismo.</li>
 </ul>
 <h3>Importante</h3>
@@ -243,19 +276,43 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
 </div>
 </dialog>
 <dialog id="cc" aria-labelledby="cct">
-<div class="dh"><h2 id="cct">Cambiar código</h2><button type="button" id="ccx">Cerrar</button></div>
-<div class="db"><form id="ccf">
+<div class="dh"><h2 id="cct">Seguridad</h2><button type="button" id="ccx">Cerrar</button></div>
+<div class="db">
+<h3>Cambiar código</h3>
+<form id="ccf">
 <label>Código actual<input id="c0" type="password" autocomplete="off" required></label>
 <label>Código nuevo<input id="c1" type="password" autocomplete="off" required></label>
 <label>Repetí el código nuevo<input id="c2" type="password" autocomplete="off" required></label>
 <div class="err" id="cerr" role="alert"></div>
 <button class="add" type="submit">Cambiar código</button>
+</form>
+<h3>Pregunta secreta</h3>
+<p class="preview">Sirve para crear un código nuevo si olvidás el actual.</p>
+<form id="qf">
+<label>Código actual<input id="q0" type="password" autocomplete="off" required></label>
+<label>Pregunta secreta<input id="q1" autocomplete="off" required></label>
+<label>Respuesta<input id="q2" autocomplete="off" autocapitalize="off" required></label>
+<div class="err" id="qerr" role="alert"></div>
+<button class="add" type="submit">Guardar pregunta</button>
+</form>
+</div>
+</dialog>
+<dialog id="dp" aria-labelledby="dpt">
+<div class="dh"><h2 id="dpt">Borrar por período</h2><button type="button" id="dpx">Cerrar</button></div>
+<div class="db"><form id="dpf">
+<p>Borra los movimientos del libro diario de un año completo o de un mes. Las cuotas y los ahorros no se tocan.</p>
+<div class="tipo" id="dptipo" role="group" aria-label="Período"><button type="button" class="e" data-p="anio" aria-pressed="true">Un año</button><button type="button" class="e" data-p="mes" aria-pressed="false">Un mes</button></div>
+<label>Período<select id="dpsel"></select></label>
+<label class="ck"><input type="checkbox" id="dpenv" checked> También borrar los envíos hechos en ese período</label>
+<label class="ck"><input type="checkbox" id="dpbk" checked> Descargar un respaldo antes de borrar</label>
+<div class="preview" id="dpinfo"></div>
+<button class="add" id="dpok" type="submit" style="background:var(--out);border-color:var(--out);color:#fff">Borrar</button>
 </form></div>
 </dialog>
 <dialog id="pd" aria-labelledby="pdt">
 <div class="dh"><h2 id="pdt">Código del respaldo</h2></div>
 <div class="db"><form id="pform">
-<p>Este respaldo se cifró con otro código. Ingresalo para abrirlo.</p>
+<p>Este respaldo se cifró con otro código. Ingresá el código que tenía cuando se hizo.</p>
 <label>Código<input id="pcode" type="password" autocomplete="off" required></label>
 <div class="btns"><button class="add" type="submit">Abrir</button><button class="sec" id="pcancel" type="button">Cancelar</button></div>
 </form></div>
@@ -456,39 +513,76 @@ h+='<tr><td><span class="badge'+(pf?' pf':'')+'">'+(pf?'Plazo fijo':'Guardado')+
 $('ahlist').innerHTML=h+'</tbody></table>';
 $('ahgen').innerHTML='<div>Total ahorrado<b class="in">'+money(tg+tp)+'</b></div><div>Guardado<b>'+money(tg)+'</b></div><div>En plazo fijo<b>'+money(tp)+'</b></div>'}
 
-/* ===== SEGURIDAD (cifrado AES-GCM + clave PBKDF2 derivada del código) ===== */
+/* ===== BORRAR POR PERÍODO ===== */
+var dpTipo='anio';
+function envYM(v){var d=new Date(v.id);return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)}
+function dpKey(ym){return dpTipo==='anio'?ym.slice(0,4):ym}
+function dpPeriods(){var o={};items.forEach(function(x){o[dpKey(x.fecha.slice(0,7))]=1});envios.forEach(function(v){o[dpKey(envYM(v))]=1});return Object.keys(o).sort().reverse()}
+function dpCount(){var k=$('dpsel').value,n=items.filter(function(x){return dpKey(x.fecha.slice(0,7))===k}).length,e=$('dpenv').checked?envios.filter(function(v){return dpKey(envYM(v))===k}).length:0;return {n:n,e:e}}
+function dpInfo(){if(!$('dpsel').value){$('dpinfo').textContent='No hay datos para borrar.';$('dpok').disabled=true;return}
+var c=dpCount();$('dpok').disabled=false;
+$('dpinfo').textContent='Se borrarán '+c.n+(c.n===1?' movimiento':' movimientos')+' del libro'+($('dpenv').checked?' y '+c.e+(c.e===1?' envío':' envíos'):'')+'.'}
+function dpFill(){var l=dpPeriods();$('dpsel').innerHTML=l.map(function(k){return '<option value="'+k+'">'+(dpTipo==='anio'?k:mesLabel(k))+'</option>'}).join('');dpInfo()}
+function dpSetTipo(t){dpTipo=t;document.querySelectorAll('#dptipo button').forEach(function(x){x.setAttribute('aria-pressed',x.dataset.p===t)});dpFill()}
+document.querySelectorAll('#dptipo button').forEach(function(b){b.onclick=function(){dpSetTipo(b.dataset.p)}});
+$('dpsel').onchange=dpInfo;$('dpenv').onchange=dpInfo;
+$('dpb').onclick=function(){$('dpenv').checked=true;$('dpbk').checked=true;dpSetTipo('anio');$('dp').showModal()};
+$('dpx').onclick=function(){$('dp').close()};
+$('dpf').onsubmit=async function(e){e.preventDefault();var k=$('dpsel').value;if(!k)return;var c=dpCount();
+var nombre=dpTipo==='anio'?'el año '+k:mesLabel(k);
+if(!confirm('Vas a borrar '+c.n+' movimiento(s)'+($('dpenv').checked?' y '+c.e+' envío(s)':'')+' de '+nombre+'. No se puede deshacer. ¿Continuar?'))return;
+try{if($('dpbk').checked)await doBackup()}catch(err){msg('No se pudo hacer el respaldo; no se borró nada.');return}
+items=items.filter(function(x){return dpKey(x.fecha.slice(0,7))!==k});
+if($('dpenv').checked)envios=envios.filter(function(v){return dpKey(envYM(v))!==k});
+persist();$('dp').close();render();envRender();msg('Se borraron los datos de '+nombre+'.')};
+
+/* ===== SEGURIDAD: clave de datos (DEK) envuelta con el código y con la respuesta secreta ===== */
 var VKEY='libro-diario-enc',FK='libro-diario-fails',UK='libro-diario-until',ITER=250000,IDLE=180000;
-var cryptoKey=null,saltB=null,iterUsed=ITER,locked=true,chain=Promise.resolve(),idleT=null,hiddenAt=0,lkT=null;
+var dekRaw=null,dekKey=null,meta=null,locked=true,chain=Promise.resolve(),idleT=null,hiddenAt=0,lkT=null,waiting=false;
 function b64(u){var s='';for(var i=0;i<u.length;i++)s+=String.fromCharCode(u[i]);return btoa(s)}
 function unb64(s){var b=atob(s),u=new Uint8Array(b.length);for(var i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u}
+function norm(t){return String(t).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim()}
 async function deriveKey(code,salt,iter){var km=await crypto.subtle.importKey('raw',new TextEncoder().encode(code),'PBKDF2',false,['deriveKey']);
 return crypto.subtle.deriveKey({name:'PBKDF2',salt:salt,iterations:iter,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
-async function encJson(json,key,salt,iter){var iv=crypto.getRandomValues(new Uint8Array(12));
-var ct=await crypto.subtle.encrypt({name:'AES-GCM',iv:iv},key,new TextEncoder().encode(json));
-return {v:1,iter:iter,salt:b64(salt),iv:b64(iv),ct:b64(new Uint8Array(ct))}}
-async function decBlob(o,code){var salt=unb64(o.salt),key=await deriveKey(code,salt,o.iter);
-var pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(o.iv)},key,unb64(o.ct));
-return {key:key,salt:salt,iter:o.iter,data:JSON.parse(new TextDecoder().decode(pt))}}
+async function wrapRaw(raw,secret){var salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12)),k=await deriveKey(secret,salt,ITER);
+var ct=await crypto.subtle.encrypt({name:'AES-GCM',iv:iv},k,raw);return {salt:b64(salt),iter:ITER,iv:b64(iv),ct:b64(new Uint8Array(ct))}}
+async function unwrapRaw(w,secret){var k=await deriveKey(secret,unb64(w.salt),w.iter);
+return new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(w.iv)},k,unb64(w.ct)))}
+function impKey(raw){return crypto.subtle.importKey('raw',raw,'AES-GCM',false,['encrypt','decrypt'])}
+async function encData(json,key){var iv=crypto.getRandomValues(new Uint8Array(12));
+var ct=await crypto.subtle.encrypt({name:'AES-GCM',iv:iv},key,new TextEncoder().encode(json));return {iv:b64(iv),ct:b64(new Uint8Array(ct))}}
+async function decData(o,key){return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(o.iv)},key,unb64(o.ct))))}
+async function decBlob(o,code){var key=await deriveKey(code,unb64(o.salt),o.iter);
+var pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(o.iv)},key,unb64(o.ct));return {data:JSON.parse(new TextDecoder().decode(pt))}}
 function snapshot(){return {items:items,envios:envios,cuotas:cuotas,ahorros:ahorros}}
 function loadState(d){items=Array.isArray(d.items)?d.items:[];envios=Array.isArray(d.envios)?d.envios:[];cuotas=Array.isArray(d.cuotas)?d.cuotas:[];ahorros=Array.isArray(d.ahorros)?d.ahorros:[]}
-function persist(){if(!cryptoKey)return chain;var json=JSON.stringify(snapshot()),k=cryptoKey,s=saltB,it=iterUsed;
-chain=chain.then(function(){return encJson(json,k,s,it)}).then(function(o){localStorage.setItem(VKEY,JSON.stringify(o))}).catch(function(){msg('No se pudo guardar. Revisá el espacio del navegador.')});
+function persist(){if(!dekKey||!meta||!meta.wa)return chain;var json=JSON.stringify(snapshot()),k=dekKey,m=meta;
+chain=chain.then(function(){return encData(json,k)}).then(function(d){localStorage.setItem(VKEY,JSON.stringify({v:2,q:m.q,wc:m.wc,wa:m.wa,iv:d.iv,ct:d.ct}))}).catch(function(){msg('No se pudo guardar. Revisá el espacio del navegador.')});
 return chain}
 function legacy(){function g(k){try{var v=JSON.parse(localStorage.getItem(k)||'null');return Array.isArray(v)?v:null}catch(e){return null}}
 return {items:g('libro-diario-v2')||g('libro-diario-v1')||[],envios:g('libro-diario-envios')||[],cuotas:g('libro-diario-cuotas')||[],ahorros:[]}}
+function readBlob(){try{return JSON.parse(localStorage.getItem(VKEY))}catch(e){return null}}
+function clearFails(){localStorage.removeItem(FK);localStorage.removeItem(UK)}
+function regFail(){var f=(+localStorage.getItem(FK)||0)+1;localStorage.setItem(FK,f);if(f>=5)localStorage.setItem(UK,Date.now()+Math.min(30*Math.pow(2,f-5),3600)*1000)}
+function wipeAll(){if(!confirm('Se borrarán TODOS los datos guardados en este dispositivo (después podés restaurar un respaldo si tenés su código). ¿Continuar?'))return;
+if(!confirm('Última confirmación: se borrarán todos los datos. ¿Seguro?'))return;
+localStorage.removeItem(VKEY);clearFails();waiting=false;dekRaw=dekKey=meta=null;showLock('s')}
 
-function showLock(mode){$('app').hidden=true;$('lock').hidden=false;$('lkU').hidden=mode!=='u';$('lkS').hidden=mode!=='s';
-if(mode==='u'){$('lerr').textContent='';lkTick();$('lcode').focus()}else{$('serr').textContent='';$('scode').focus()}}
-var waiting=false;
+var MODES={u:'lkU',s:'lkS',q:'lkQ',r:'lkR'},FOCUS={u:'lcode',s:'scode',q:'mq',r:'ra'};
+function showLock(mode){$('app').hidden=true;$('lock').hidden=false;
+Object.keys(MODES).forEach(function(m){$(MODES[m]).hidden=m!==mode});
+['lerr','serr','mqerr','rerr'].forEach(function(i){$(i).textContent=''});
+if(mode==='r'){var b=readBlob();$('rq').textContent=b&&b.q?b.q:''}
+lkTick();$(FOCUS[mode]).focus()}
 function lkTick(){clearTimeout(lkT);var r=Math.ceil(((+localStorage.getItem(UK)||0)-Date.now())/1000);
-if(r>0){waiting=true;$('lbtn').disabled=true;$('lerr').textContent='Demasiados intentos. Esperá '+r+' s.';lkT=setTimeout(lkTick,500)}
-else{$('lbtn').disabled=false;if(waiting){waiting=false;$('lerr').textContent=''}}}
+if(r>0){waiting=true;$('lbtn').disabled=true;$('rbtn').disabled=true;var t='Demasiados intentos. Esperá '+r+' s.';$('lerr').textContent=t;$('rerr').textContent=t;lkT=setTimeout(lkTick,500)}
+else{$('lbtn').disabled=false;$('rbtn').disabled=false;if(waiting){waiting=false;$('lerr').textContent='';$('rerr').textContent=''}}}
 function enterApp(){locked=false;$('lock').hidden=true;$('app').hidden=false;endEdit();cuEnd();ahEnd();draft=[];render();showTab('libro');window.scrollTo(0,0);bump()}
-function lockNow(){if(locked||!cryptoKey)return;locked=true;clearTimeout(idleT);
-items=[];envios=[];cuotas=[];ahorros=[];draft=[];cryptoKey=null;saltB=null;editId=null;editCu=null;editAh=null;
-['tabla','tot','elist','egen','clist','cgen','ahlist','ahgen','edraft','fmes','fcat','emes','ereg','cats','prev','cprev','etot'].forEach(function(i){var n=$(i);if(n){n.innerHTML='';n.textContent=''}});
-['f','ef','cf','af','ccf'].forEach(function(i){$(i).reset()});
-['ayuda','cc','pd'].forEach(function(i){var d=$(i);if(d.open)d.close()});
+function lockNow(){if(locked||!dekKey)return;locked=true;clearTimeout(idleT);
+items=[];envios=[];cuotas=[];ahorros=[];draft=[];dekRaw=null;dekKey=null;meta=null;editId=null;editCu=null;editAh=null;
+['tabla','tot','elist','egen','clist','cgen','ahlist','ahgen','edraft','fmes','fcat','emes','ereg','cats','prev','cprev','etot','dpsel','dpinfo'].forEach(function(i){var n=$(i);if(n){n.innerHTML='';n.textContent=''}});
+['f','ef','cf','af','ccf','qf','dpf'].forEach(function(i){$(i).reset()});
+['ayuda','cc','pd','dp'].forEach(function(i){var d=$(i);if(d.open)d.close()});
 $('lcode').value='';showLock('u')}
 function bump(){if(locked)return;clearTimeout(idleT);idleT=setTimeout(lockNow,IDLE)}
 ['click','keydown','touchstart','scroll'].forEach(function(ev){addEventListener(ev,bump,{passive:true})});
@@ -497,53 +591,79 @@ $('lkb').onclick=lockNow;
 
 $('lkU').onsubmit=async function(e){e.preventDefault();if($('lbtn').disabled)return;var code=$('lcode').value;
 $('lbtn').disabled=true;$('lerr').textContent='Verificando…';
-try{var r=await decBlob(JSON.parse(localStorage.getItem(VKEY)),code);
-localStorage.removeItem(FK);localStorage.removeItem(UK);
-cryptoKey=r.key;saltB=r.salt;iterUsed=r.iter;loadState(r.data);$('lcode').value='';$('lerr').textContent='';enterApp()}
-catch(err){var f=(+localStorage.getItem(FK)||0)+1;localStorage.setItem(FK,f);
-if(f>=5){localStorage.setItem(UK,Date.now()+Math.min(30*Math.pow(2,f-5),3600)*1000)}
-$('lcode').value='';$('lerr').textContent='Código incorrecto.';$('lbtn').disabled=false;lkTick()}};
+try{var blob=readBlob();
+if(blob.v===2){var raw=await unwrapRaw(blob.wc,code),key=await impKey(raw),d=await decData(blob,key);
+dekRaw=raw;dekKey=key;loadState(d);meta={q:blob.q,wc:blob.wc,wa:blob.wa};clearFails();$('lcode').value='';enterApp()}
+else{var r=await decBlob(blob,code);loadState(r.data);dekRaw=crypto.getRandomValues(new Uint8Array(32));dekKey=await impKey(dekRaw);
+meta={q:'',wc:await wrapRaw(dekRaw,code),wa:null};clearFails();$('lcode').value='';showLock('q')}}
+catch(err){dekRaw=dekKey=meta=null;regFail();$('lcode').value='';$('lerr').textContent='Código incorrecto.';$('lbtn').disabled=false;lkTick()}};
 
-$('lkS').onsubmit=async function(e){e.preventDefault();var a=$('scode').value;
+function chkQA(q,a){if(q.trim().length<3)return 'Escribí una pregunta secreta.';if(norm(a).length<3)return 'La respuesta necesita al menos 3 caracteres.';return ''}
+
+$('lkS').onsubmit=async function(e){e.preventDefault();var a=$('scode').value,q=$('sq').value.trim(),ans=$('sa').value,m;
 if(a.length<4){$('serr').textContent='El código necesita al menos 4 caracteres.';return}
 if(a!==$('scode2').value){$('serr').textContent='Los códigos no coinciden.';return}
+if(m=chkQA(q,ans)){$('serr').textContent=m;return}
 $('serr').textContent='Protegiendo tus datos…';
-try{saltB=crypto.getRandomValues(new Uint8Array(16));iterUsed=ITER;cryptoKey=await deriveKey(a,saltB,iterUsed);
+try{dekRaw=crypto.getRandomValues(new Uint8Array(32));dekKey=await impKey(dekRaw);
+var w=await Promise.all([wrapRaw(dekRaw,a),wrapRaw(dekRaw,norm(ans))]);meta={q:q,wc:w[0],wa:w[1]};
 loadState(legacy());await persist();
-if(!localStorage.getItem(VKEY))throw 0;
+var b=readBlob();if(!b||b.v!==2)throw 0;
 ['libro-diario-v2','libro-diario-v1','libro-diario-envios','libro-diario-cuotas'].forEach(function(k){localStorage.removeItem(k)});
-$('scode').value='';$('scode2').value='';enterApp()}
-catch(err){cryptoKey=null;$('serr').textContent='No se pudo activar el cifrado en este dispositivo.'}};
+['scode','scode2','sq','sa'].forEach(function(i){$(i).value=''});enterApp()}
+catch(err){dekRaw=dekKey=meta=null;$('serr').textContent='No se pudo activar el cifrado en este dispositivo.'}};
 
-$('lforg').onclick=function(){
-if(!confirm('Si no recordás el código, la única forma de volver a usar la app es borrar los datos de este dispositivo (después podés restaurar un respaldo si tenés el código del respaldo). ¿Borrar todo?'))return;
-if(!confirm('Última confirmación: se borrarán todos los datos guardados acá. ¿Seguro?'))return;
-localStorage.removeItem(VKEY);localStorage.removeItem(FK);localStorage.removeItem(UK);waiting=false;showLock('s')};
+$('lkQ').onsubmit=async function(e){e.preventDefault();var q=$('mq').value.trim(),ans=$('ma').value,m;
+if(m=chkQA(q,ans)){$('mqerr').textContent=m;return}
+$('mqerr').textContent='Guardando…';
+try{meta={q:q,wc:meta.wc,wa:await wrapRaw(dekRaw,norm(ans))};await persist();
+var b=readBlob();if(!b||b.v!==2)throw 0;$('mq').value='';$('ma').value='';enterApp()}
+catch(err){$('mqerr').textContent='No se pudo guardar. Probá de nuevo.'}};
 
-$('ccb').onclick=function(){$('ccf').reset();$('cerr').textContent='';$('cc').showModal()};
+$('lforg').onclick=function(){var b=readBlob();if(b&&b.v===2&&b.wa)showLock('r');else wipeAll()};
+$('rback').onclick=function(){showLock('u')};
+$('rwipe').onclick=wipeAll;
+$('lkR').onsubmit=async function(e){e.preventDefault();if($('rbtn').disabled)return;var n1=$('rc1').value;
+if(n1.length<4){$('rerr').textContent='El código nuevo necesita al menos 4 caracteres.';return}
+if(n1!==$('rc2').value){$('rerr').textContent='Los códigos nuevos no coinciden.';return}
+$('rbtn').disabled=true;$('rerr').textContent='Verificando…';var blob=readBlob(),raw,key,d;
+try{raw=await unwrapRaw(blob.wa,norm($('ra').value));key=await impKey(raw);d=await decData(blob,key)}
+catch(err){regFail();$('ra').value='';$('rerr').textContent='Respuesta incorrecta.';$('rbtn').disabled=false;lkTick();return}
+try{dekRaw=raw;dekKey=key;loadState(d);meta={q:blob.q,wc:await wrapRaw(raw,n1),wa:blob.wa};await persist();clearFails();
+['ra','rc1','rc2'].forEach(function(i){$(i).value=''});enterApp()}
+catch(err){dekRaw=dekKey=meta=null;$('rbtn').disabled=false;$('rerr').textContent='No se pudo cambiar el código.'}};
+
+$('ccb').onclick=function(){$('ccf').reset();$('qf').reset();$('cerr').textContent='';$('qerr').textContent='';$('q1').value=meta&&meta.q?meta.q:'';$('cc').showModal()};
 $('ccx').onclick=function(){$('cc').close()};
 $('ccf').onsubmit=async function(e){e.preventDefault();var a=$('c1').value;
 if(a.length<4){$('cerr').textContent='El código nuevo necesita al menos 4 caracteres.';return}
 if(a!==$('c2').value){$('cerr').textContent='Los códigos nuevos no coinciden.';return}
 $('cerr').textContent='Verificando…';
-try{await chain;await decBlob(JSON.parse(localStorage.getItem(VKEY)),$('c0').value)}catch(err){$('cerr').textContent='El código actual es incorrecto.';return}
-try{var s=crypto.getRandomValues(new Uint8Array(16)),k=await deriveKey(a,s,ITER);saltB=s;cryptoKey=k;iterUsed=ITER;await persist();
-$('cc').close();$('ccf').reset();msg('Código cambiado.')}catch(err){$('cerr').textContent='No se pudo cambiar el código.'}};
+try{await unwrapRaw(meta.wc,$('c0').value)}catch(err){$('cerr').textContent='El código actual es incorrecto.';return}
+try{meta={q:meta.q,wc:await wrapRaw(dekRaw,a),wa:meta.wa};await persist();$('cc').close();$('ccf').reset();msg('Código cambiado.')}
+catch(err){$('cerr').textContent='No se pudo cambiar el código.'}};
+$('qf').onsubmit=async function(e){e.preventDefault();var q=$('q1').value.trim(),m;
+if(m=chkQA(q,$('q2').value)){$('qerr').textContent=m;return}
+$('qerr').textContent='Verificando…';
+try{await unwrapRaw(meta.wc,$('q0').value)}catch(err){$('qerr').textContent='El código actual es incorrecto.';return}
+try{meta={q:q,wc:meta.wc,wa:await wrapRaw(dekRaw,norm($('q2').value))};await persist();$('cc').close();$('qf').reset();msg('Pregunta secreta guardada.')}
+catch(err){$('qerr').textContent='No se pudo guardar la pregunta.'}};
 
 function askCode(){return new Promise(function(res){var d=$('pd');$('pcode').value='';
 $('pform').onsubmit=function(e){e.preventDefault();var v=$('pcode').value;d.close();res(v)};
 $('pcancel').onclick=function(){d.close();res(null)};
 d.oncancel=function(){res(null)};d.showModal()})}
 
-$('bk').onclick=async function(){try{var o=await encJson(JSON.stringify(snapshot()),cryptoKey,saltB,iterUsed);
-dl(new Blob([JSON.stringify(o)],{type:'application/json'}),'respaldo-libro-diario.json');msg('Respaldo cifrado descargado. Para abrirlo hace falta tu código.')}
-catch(e){msg('No se pudo crear el respaldo.')}};
+async function doBackup(){await persist();var raw=localStorage.getItem(VKEY);if(!raw)throw 0;
+dl(new Blob([raw],{type:'application/json'}),'respaldo-libro-diario.json')}
+$('bk').onclick=async function(){try{await doBackup();msg('Respaldo cifrado descargado. Para abrirlo hace falta tu código.')}catch(e){msg('No se pudo crear el respaldo.')}};
 $('rs').onclick=function(){$('rf').click()};
 $('rf').onchange=function(){var inp=this,f=inp.files[0];inp.value='';if(!f)return;var r=new FileReader();
 r.onload=async function(){try{var o=JSON.parse(r.result),d;
-if(o&&o.ct&&o.salt){
-if(o.salt===b64(saltB)&&o.iter===iterUsed){var pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(o.iv)},cryptoKey,unb64(o.ct));d=JSON.parse(new TextDecoder().decode(pt))}
-else{var code=await askCode();if(code===null)return;d=(await decBlob(o,code)).data}}
+if(o&&o.v===2&&o.wc){
+if(o.wc.salt===meta.wc.salt&&o.wc.ct===meta.wc.ct){d=await decData(o,dekKey)}
+else{var code=await askCode();if(code===null)return;d=await decData(o,await impKey(await unwrapRaw(o.wc,code)))}}
+else if(o&&o.ct&&o.salt){var c2=await askCode();if(c2===null)return;d=(await decBlob(o,c2)).data}
 else d=o;
 if(!d||!Array.isArray(d.items))throw 0;
 if(!confirm('Esto reemplaza los datos actuales. ¿Continuar?'))return;
@@ -551,7 +671,7 @@ loadState(d);persist();render();envRender();cuRender();ahRender();msg('Respaldo 
 catch(e){msg('El archivo no es un respaldo válido, o el código es incorrecto.')}};r.readAsText(f)};
 
 function boot(){
-if(!(window.crypto&&crypto.subtle)){$('lock').hidden=false;$('app').hidden=true;$('lkU').hidden=true;$('lkS').hidden=true;
+if(!(window.crypto&&crypto.subtle)){$('lock').hidden=false;$('app').hidden=true;Object.keys(MODES).forEach(function(m){$(MODES[m]).hidden=true});
 var p=document.createElement('p');p.className='err';p.textContent='Este navegador no permite el cifrado. Abrí la app desde el link https:// y con un navegador actualizado.';$('lock').firstElementChild.appendChild(p);return}
 var has=false;try{has=!!localStorage.getItem(VKEY)}catch(e){}
 showLock(has?'u':'s')}

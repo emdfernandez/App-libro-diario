@@ -4,7 +4,8 @@ LIBRO DIARIO - app instalable (PWA)
    Android (Chrome): menú ⋮ > "Instalar app" / "Agregar a pantalla de inicio".
    iPhone (Safari): Compartir > "Añadir a pantalla de inicio".
 3) Los datos quedan guardados en ese celular. Usá "Respaldo" para guardarlos y "Restaurar" para recuperarlos.
-Si modificás index.html, cambiá el número en sw.js (libro-diario-v6 -> v7) para que se actualice.
+Si modificás index.html, cambiá el número en sw.js (libro-diario-v7 -> v8) para que se actualice.
 
-SEGURIDAD: la primera vez que abras la app te pide crear un código. Tus datos quedan cifrados (AES-256) con ese código. Si lo olvidás NO se pueden recuperar (solo restaurando un respaldo, que también necesita el código).
+SEGURIDAD: la primera vez que abras la app te pide crear un código. Tus datos quedan cifrados (AES-256) con ese código. Al crearlo también escribís una pregunta secreta: si olvidás el código, "Olvidé mi código" te deja crear uno nuevo respondiéndola. Si olvidás el código Y la respuesta, los datos NO se pueden recuperar.
 Al actualizar desde la versión anterior, tus datos se migran solos y quedan cifrados.
+"Borrar por período" borra los movimientos de un año o de un mes (y opcionalmente los envíos de ese período).
